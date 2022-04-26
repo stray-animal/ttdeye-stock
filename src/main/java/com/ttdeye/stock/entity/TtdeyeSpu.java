@@ -16,7 +16,7 @@ import lombok.Setter;
  * </p>
  *
  * @author 张永明
- * @since 2022-04-25
+ * @since 2022-04-26
  */
 @Getter
 @Setter
@@ -81,12 +81,7 @@ public class TtdeyeSpu implements Serializable {
     /**
      * 更新人账号
      */
-    private String updateLoginName;
-
-    /**
-     * 商品代码或昵称
-     */
-    private String spuNickName;
+    private String updateLoginAccount;
 
     /**
      * 是否删除：1-删除，0-未删除
@@ -102,6 +97,11 @@ public class TtdeyeSpu implements Serializable {
      * 是否支持批次：1-支持，0-不支持
      */
     private Integer batchFlag;
+
+    /**
+     * SPU编号
+     */
+    private String spuNo;
 
 
 }

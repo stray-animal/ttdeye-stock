@@ -66,18 +66,22 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
         if(CollectionUtils.isEmpty(spuImportDtoList)){
             return ApiResponseT.failed("文件不能为空！");
         }
-        for (SpuImportDto spuImportDto : spuImportDtoList) {
+
+        for (int i = 0; i < spuImportDtoList.size(); i++) {
+            Integer line = i+1;
+            SpuImportDto spuImportDto = spuImportDtoList.get(i);
             if(spuImportDto.getBatchFlag() == null){
                 return ApiResponseT.failed("是否分批次商品存在空值！");
             }
             //商品代码是否重复
-          Long count = ttdeyeSpuMapper.selectCount(Wrappers.<TtdeyeSpu>lambdaQuery()
-                  .eq(TtdeyeSpu::getDeleteFlag,0)
-                  .eq(TtdeyeSpu::getSpuNickName,spuImportDto.getSpuNickName()));
+            Long count = ttdeyeSpuMapper.selectCount(Wrappers.<TtdeyeSpu>lambdaQuery()
+                    .eq(TtdeyeSpu::getDeleteFlag,0)
+                    .eq(TtdeyeSpu::getSpuCode,spuImportDto.getSpuCode()));
             if(count > 0){
-                return ApiResponseT.failed("商品代码"+spuImportDto.getSpuNickName()+"已存在,请修改后重新上传！");
+                return ApiResponseT.failed("第"+line+"行,SKU代码商品代码"+spuImportDto.getSpuCode()+"已存在,请修改后重新上传！");
             }
         }
+
         for (SpuImportDto spuImportDto : spuImportDtoList) {
             TtdeyeSpu ttdeyeSpu = new TtdeyeSpu();
             BeanUtils.copyProperties(spuImportDto,ttdeyeSpu);
@@ -85,7 +89,7 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
             ttdeyeSpu.setCreateTime(new Date());
             ttdeyeSpu.setSourceType(2);
             ttdeyeSpu.setSpuAttributesType(1);
-            ttdeyeSpu.setUpdateLoginName(ttdeyeUser.getLoginAccount());
+            ttdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
             //保存SPU信息
             ttdeyeSpuMapper.insert(ttdeyeSpu);
         }

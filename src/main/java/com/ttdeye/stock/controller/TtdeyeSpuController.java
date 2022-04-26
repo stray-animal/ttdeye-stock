@@ -43,7 +43,7 @@ public class TtdeyeSpuController extends BaseController {
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSpu.setCreateTime(new Date());
         iTtdeyeSpu.setUpdateTime(new Date());
-        iTtdeyeSpu.setUpdateLoginName(ttdeyeUser.getLoginAccount());
+        iTtdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
         iTtdeyeSpu.setSourceType(1);
         iTtdeyeSpuService.save(iTtdeyeSpu);
         return ApiResponseT.ok();
@@ -59,7 +59,7 @@ public class TtdeyeSpuController extends BaseController {
     public ApiResponseT editUser(@RequestBody TtdeyeSpu iTtdeyeSpu){
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSpu.setUpdateTime(new Date());
-        iTtdeyeSpu.setUpdateLoginName(ttdeyeUser.getLoginAccount());
+        iTtdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
         iTtdeyeSpuService.updateById(iTtdeyeSpu);
         return ApiResponseT.ok();
     }

@@ -17,7 +17,7 @@ import lombok.Setter;
  * </p>
  *
  * @author 张永明
- * @since 2022-04-25
+ * @since 2022-04-26
  */
 @Getter
 @Setter
@@ -107,7 +107,17 @@ public class TtdeyeSku implements Serializable {
     /**
      * spu编码
      */
-    private String spuCode;
+    private String spuNo;
+
+    /**
+     * 是否删除：1-删除，0-未删除
+     */
+    private Integer deleteFlag;
+
+    /**
+     * SKU编号
+     */
+    private String skuNo;
 
 
 }

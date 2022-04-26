@@ -17,9 +17,9 @@ public class SpuImportDto implements Serializable {
     /**
      * 商品代码
      */
-    @Excel(name = "商品代码")
+    @Excel(name = "SPU代码")
     @NotNull
-    private String spuNickName;
+    private String spuCode;
 
 
     /**
@@ -61,13 +61,12 @@ public class SpuImportDto implements Serializable {
     @Excel(name = "备注")
     private String remark;
 
-
-    public String getSpuNickName() {
-        return spuNickName;
+    public String getSpuCode() {
+        return spuCode;
     }
 
-    public void setSpuNickName(String spuNickName) {
-        this.spuNickName = spuNickName;
+    public void setSpuCode(String spuCode) {
+        this.spuCode = spuCode;
     }
 
     public String getTitleCh() {

@@ -16,7 +16,7 @@ import lombok.Setter;
  * </p>
  *
  * @author 张永明
- * @since 2022-04-25
+ * @since 2022-04-26
  */
 @Getter
 @Setter
@@ -37,9 +37,9 @@ public class TtdeyeSkuBatch implements Serializable {
     private Long skuId;
 
     /**
-     * sku编码
+     * sku编号
      */
-    private String skuCode;
+    private String skuNo;
 
     /**
      * 批次id
@@ -77,6 +77,11 @@ public class TtdeyeSkuBatch implements Serializable {
      */
       @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
+
+    /**
+     * sku批次库存编号
+     */
+    private String skuBatchNo;
 
 
 }
