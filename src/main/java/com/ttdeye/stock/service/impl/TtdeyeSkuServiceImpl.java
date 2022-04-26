@@ -2,13 +2,16 @@ package com.ttdeye.stock.service.impl;
 
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
+import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.poi.SkuImportDto;
+import com.ttdeye.stock.domain.dto.req.SkuExportReq;
 import com.ttdeye.stock.entity.*;
 import com.ttdeye.stock.mapper.*;
 import com.ttdeye.stock.service.ITtdeyeFileLogService;
@@ -24,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -215,6 +219,21 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
         //保存SPU信息
         ttdeyeSkuMapper.insert(ttdeyeSku);
         return ttdeyeSku;
+    }
+
+
+    /**
+     * 查询导出数据
+     * @param skuExportReq
+     * @return
+     */
+   public List<SkuExportDto> selectExportData(SkuExportReq skuExportReq){
+
+
+      List<SkuExportDto> ttdeyeSkus = ttdeyeSkuMapper.selectExportData(skuExportReq);
+
+
+        return ttdeyeSkus;
     }
 
 

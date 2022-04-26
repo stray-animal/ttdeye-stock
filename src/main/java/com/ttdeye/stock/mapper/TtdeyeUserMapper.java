@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @author 张永明
  * @since 2022-04-25
  */
-
+@Mapper
 public interface TtdeyeUserMapper extends BaseMapper<TtdeyeUser> {
 
 }

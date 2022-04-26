@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /***
  **@author 张永明
  **@date 2022/4/26 22:09
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TtdeyeUserDto extends TtdeyeUser {
+public class TtdeyeUserDto extends TtdeyeUser implements Serializable {
 
     /**
      * 用户token

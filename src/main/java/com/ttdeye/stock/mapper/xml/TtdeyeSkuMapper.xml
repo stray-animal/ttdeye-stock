@@ -2,4 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ttdeye.stock.mapper.TtdeyeSkuMapper">
 
+    <select id="selectExportData" resultType="com.ttdeye.stock.domain.dto.poi.SkuExportDto"
+    parameterType="com.ttdeye.stock.domain.dto.req.SkuExportReq">
+
+        select
+            spu.spu_code            as spuCode,
+            spu.title_ch            as titleCh,
+            spu.title_en            as titleEn,
+            spu.e_commerce_platform as eCommercePlatform,
+            sku.sku_code            as skuCode,
+            sku.sku_name            as skuName,
+            sku.purchase_price      as purchasePrice,
+            sku.stock_current_num   as stockCurrentNum,
+            sku.state               as state
+
+        from ttdeye_sku sku
+                 inner join ttdeye_spu spu on sku.spu_id = spu.spu_id
+        <where>
+            sku.delete_flag = 0
+        <if test="skuExportReq.state != null">
+          and  sku.state = #{skuExportReq.state}
+        </if>
+            <if test="skuExportReq.startSum != null">
+                and  sku.stock_current_num &gt;= #{skuExportReq.startSum}
+            </if>
+
+            <if test="skuExportReq.endSum != null">
+                and  sku.stock_current_num &lt; #{skuExportReq.endSum}
+            </if>
+
+        </where>
+
+
+    </select>
+
+
+
+
 </mapper>

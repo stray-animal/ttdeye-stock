@@ -45,7 +45,7 @@ public class SpuImportDto implements Serializable {
     /**
      * 电商平台
      */
-    @Excel(name = "电商平台",replace = {"Shopify_1", "all_0"})
+    @Excel(name = "电商平台",replace = {"Shopify_1", "其他_0"})
     private Integer eCommercePlatform;
 
     /**

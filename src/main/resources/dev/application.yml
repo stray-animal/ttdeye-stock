@@ -41,8 +41,10 @@ redis:
 #  #  reasonable: true
 #  supportMethodsArguments: true
 #  params: count=countSql
+#
 
-
+mybatis-plus:
+  mapper-locations: classpath:com/ttdeye/stock/mapper/xml/*.xml
 
 logging:
   file:
