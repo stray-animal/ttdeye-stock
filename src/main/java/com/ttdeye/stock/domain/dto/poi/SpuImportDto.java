@@ -51,7 +51,7 @@ public class SpuImportDto implements Serializable {
     /**
      * 是否支持批次：1-支持，0-不支持
      */
-    @Excel(name = "是否分批次",replace = {"是_1", "否_0"})
+    @Excel(name = "是否分批次商品",replace = {"是_1", "否_0"})
     @NotNull
     private Integer batchFlag;
 

@@ -1,13 +1,10 @@
 package com.ttdeye.stock.controller;
 
-import cn.afterturn.easypoi.excel.ExcelImportUtil;
-import cn.afterturn.easypoi.excel.entity.ImportParams;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
-import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.domain.dto.GoodsInfoDto;
-import com.ttdeye.stock.domain.dto.poi.SpuImportDto;
 import com.ttdeye.stock.domain.dto.req.GoodsListReq;
 import com.ttdeye.stock.entity.TtdeyeSpu;
 import com.ttdeye.stock.entity.TtdeyeUser;
@@ -15,13 +12,9 @@ import com.ttdeye.stock.service.ITtdeyeSpuService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.ttdeye.stock.common.base.controller.BaseController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
-import java.util.List;
 
 /**
  * <p>
@@ -39,9 +32,6 @@ public class TtdeyeSpuController extends BaseController {
 
     @Autowired
     private ITtdeyeSpuService iTtdeyeSpuService;
-
-    @Autowired
-    private OSSClientUtils ossClientUtils;
 
     /**
      * 新增SPU
@@ -108,16 +98,10 @@ public class TtdeyeSpuController extends BaseController {
      */
     @PostMapping(value = "/spuImport")
     public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
-        InputStream inputStream = multipartFile.getInputStream();
 
-        String url = ossClientUtils.uploadImg2Oss(multipartFile);
-        log.info("excel OSS url-{}",url);
-        ImportParams params = new ImportParams();
-        params.setHeadRows(1);
-        List<SpuImportDto> spuImportDtoList = ExcelImportUtil.importExcel(inputStream, SpuImportDto.class,  params);
-
-        log.info("spuImportDtoList----{}", JacksonUtil.toJsonString(spuImportDtoList));
-        return null;
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        ApiResponseT apiResponseT =  iTtdeyeSpuService.spuImport(multipartFile,ttdeyeUser);
+        return apiResponseT;
     }
 
 
