@@ -58,9 +58,9 @@ public class TtdeyeSku implements Serializable {
     private Long stockOutNum;
 
     /**
-     * 采购单价-分
+     * 采购单价
      */
-    private Long purchasePrice;
+    private BigDecimal purchasePrice;
 
     /**
      * 备注

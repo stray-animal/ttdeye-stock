@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +30,7 @@ public class TtdeyeUser implements Serializable {
     /**
      * 用户主键id
      */
-      @TableId(value = "user_id", type = IdType.AUTO)
+    @TableId(value = "user_id", type = IdType.AUTO)
     private Long userId;
 
     /**
@@ -64,13 +66,13 @@ public class TtdeyeUser implements Serializable {
     /**
      * 创建时间
      */
-      @TableField(fill = FieldFill.INSERT)
+    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
      * 更新时间
      */
-      @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
     /**
@@ -88,10 +90,5 @@ public class TtdeyeUser implements Serializable {
      */
     private String phone;
 
-    /**
-     * 用户token
-     */
-    @TableField(exist = false)
-    private String token;
 
 }

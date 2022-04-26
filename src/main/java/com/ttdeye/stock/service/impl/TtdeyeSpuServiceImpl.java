@@ -3,19 +3,26 @@ package com.ttdeye.stock.service.impl;
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
+import com.ttdeye.stock.domain.dto.GoodsInfoDto;
 import com.ttdeye.stock.domain.dto.poi.SpuImportDto;
+import com.ttdeye.stock.domain.dto.req.GoodsListReq;
 import com.ttdeye.stock.entity.TtdeyeFileLog;
+import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeSpu;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.mapper.TtdeyeFileLogMapper;
+import com.ttdeye.stock.mapper.TtdeyeSkuMapper;
 import com.ttdeye.stock.mapper.TtdeyeSpuMapper;
+import com.ttdeye.stock.service.ITtdeyeFileLogService;
 import com.ttdeye.stock.service.ITtdeyeSpuService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +55,11 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
     @Autowired
     private OSSClientUtils ossClientUtils;
 
+    @Autowired
+    private ITtdeyeFileLogService iTtdeyeFileLogService;
+
+    @Autowired
+    private TtdeyeSkuMapper ttdeyeSkuMapper;
 
     /**
      * 导入excel创建SPU
@@ -93,15 +105,45 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
             ttdeyeSpuMapper.insert(ttdeyeSpu);
         }
 
-        //SPU保存完成，保存上传文件记录
-        String url = ossClientUtils.uploadImg2Oss(multipartFile);
-        TtdeyeFileLog ttdeyeFileLog = new TtdeyeFileLog();
-        ttdeyeFileLog.setFileUrl(url);
-        ttdeyeFileLog.setFileType(1);
-        ttdeyeFileLog.setCreateTime(new Date());
-        ttdeyeFileLog.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
-        ttdeyeFileLogMapper.insert(ttdeyeFileLog);
+        //上传文件并保存记录
+        iTtdeyeFileLogService.saveFile(multipartFile,1,ttdeyeUser.getLoginAccount());
 
         return ApiResponseT.ok();
+    }
+
+
+
+    /**
+     * 查询商品列表
+     * @param page
+     * @param goodsListReq
+     * @return
+     */
+    public Page<GoodsInfoDto> selectGoodsInfoDtoListPage(Page page, GoodsListReq goodsListReq){
+        Page<TtdeyeSpu> ttdeyeSpuPage = ttdeyeSpuMapper.selectPage(page,Wrappers.<TtdeyeSpu>lambdaQuery()
+                .like(goodsListReq.getSpuCode() != null,TtdeyeSpu::getSpuCode,goodsListReq.getSpuCode())
+                .eq(goodsListReq.getECommercePlatform() != null,TtdeyeSpu::getECommercePlatform,goodsListReq.getECommercePlatform())
+                .ge(goodsListReq.getStartTime() != null,TtdeyeSpu::getCreateTime,goodsListReq.getStartTime())
+                .lt(goodsListReq.getEndTime() !=null,TtdeyeSpu::getCreateTime,goodsListReq.getEndTime())
+        );
+        Page<GoodsInfoDto> goodsInfoDtoPage = new Page<>();
+        BeanUtils.copyProperties(ttdeyeSpuPage,goodsInfoDtoPage);
+        List<TtdeyeSpu> ttdeyeSpus = ttdeyeSpuPage.getRecords();
+        if(CollectionUtils.isEmpty(ttdeyeSpus)){
+            return goodsInfoDtoPage;
+        }
+
+        List<GoodsInfoDto> goodsInfoDtos = Lists.newArrayList();
+        for (TtdeyeSpu ttdeyeSpu : ttdeyeSpus) {
+            List<TtdeyeSku> ttdeyeSkus = ttdeyeSkuMapper.selectList(Wrappers.<TtdeyeSku>lambdaQuery().eq(TtdeyeSku::getDeleteFlag,0)
+                            .eq(TtdeyeSku::getSpuId,ttdeyeSpu.getSpuId())
+                        );
+            GoodsInfoDto goodsInfoDto = new GoodsInfoDto();
+            BeanUtils.copyProperties(ttdeyeSpu,goodsInfoDto);
+            goodsInfoDto.setSkuList(ttdeyeSkus);
+            goodsInfoDtos.add(goodsInfoDto);
+        }
+        goodsInfoDtoPage.setRecords(goodsInfoDtos);
+        return goodsInfoDtoPage;
     }
 }

@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 
 /**
- * <p>
- * 批次信息 前端控制器
- * </p>
+ * 批次信息
  *
  * @author 张永明
  * @since 2022-04-25

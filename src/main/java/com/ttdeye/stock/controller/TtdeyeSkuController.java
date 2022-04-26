@@ -12,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Date;
 
 /**
- * <p>
- * 产品信息表SKU 前端控制器
- * </p>
+ * 产品信息(SKU)
  *
  * @author 张永明
  * @since 2022-04-25
@@ -22,7 +20,6 @@ import java.util.Date;
 @RestController
 @RequestMapping("/ttdeye-sku")
 public class TtdeyeSkuController extends BaseController {
-
 
 
     @Autowired
@@ -83,6 +80,22 @@ public class TtdeyeSkuController extends BaseController {
     }
 
 
+    /**
+     * 删除 SKU
+     * @param skuId
+     * @return
+     */
+    @GetMapping(value = "deleteSku")
+    public ApiResponseT deleteSku(Long skuId){
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        TtdeyeSku ttdeyeSku = new TtdeyeSku();
+        ttdeyeSku.setSkuId(skuId);
+        ttdeyeSku.setUpdateTime(new Date());
+        ttdeyeSku.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
+        ttdeyeSku.setDeleteFlag(1);
+        iTtdeyeSkuService.updateById(ttdeyeSku);
+        return ApiResponseT.ok();
+    }
 
 
 }

@@ -9,19 +9,19 @@ import com.ttdeye.stock.common.utils.JwtUtils;
 import com.ttdeye.stock.common.utils.PasswordUtil;
 import com.ttdeye.stock.common.utils.RedisTemplateUtil;
 import com.ttdeye.stock.domain.dto.UserLoginDto;
+import com.ttdeye.stock.domain.dto.poi.TtdeyeUserDto;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.mapper.TtdeyeUserMapper;
 import com.ttdeye.stock.service.ITtdeyeUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
 /**
- * <p>
  * 用户表 前端控制器
- * </p>
  *
  * @author 张永明
  * @since 2022-04-25
@@ -41,8 +41,13 @@ public class TtdeyeUserController extends BaseController {
 
     public static final String SALT = "zjJBgWlC";
 
+    /**
+     * 用户登陆
+     * @param userLoginDto
+     * @return
+     */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ApiResponseT<TtdeyeUser> login(@RequestBody UserLoginDto userLoginDto){
+    public ApiResponseT<TtdeyeUserDto> login(@RequestBody UserLoginDto userLoginDto){
 
         String username = userLoginDto.getLoginAccount();
         String password = userLoginDto.getLoginPassword();
@@ -56,7 +61,6 @@ public class TtdeyeUserController extends BaseController {
         //前端密码名文
         String userpassword = PasswordUtil.encrypt(username, password, SALT);
         //2. 校验用户名或密码是否正确
-
         String syspassword = sysUser.getLoginPassword();
         if (!syspassword.equals(userpassword)) {
             return ApiResponseT.failed("密码错误");
@@ -66,9 +70,12 @@ public class TtdeyeUserController extends BaseController {
         String token = JwtUtils.createJwt(sysUser);
         //设置用户token和缓存
         log.info("登陆用户token为：{}", token);
-        sysUser.setToken(token);
-        redisTemplateUtil.set(token, sysUser, GlobalBusinessConstant.EXPIRE_TIMES.WEEKS_ONE);
-        return ApiResponseT.ok(sysUser);
+        TtdeyeUserDto ttdeyeUserDto = new TtdeyeUserDto();
+        BeanUtils.copyProperties(sysUser,ttdeyeUserDto);
+        ttdeyeUserDto.setLoginPassword(null);
+        ttdeyeUserDto.setToken(token);
+        redisTemplateUtil.set(token, ttdeyeUserDto, GlobalBusinessConstant.EXPIRE_TIMES.HOURS_ONE);
+        return ApiResponseT.ok(ttdeyeUserDto);
     }
 
     /**
@@ -128,6 +135,11 @@ public class TtdeyeUserController extends BaseController {
     }
 
 
+    /**
+     * 根据用户id查询用户信息
+     * @param userId
+     * @return
+     */
     @GetMapping(value = "/getById")
     public ApiResponseT<TtdeyeUser> getTtdeyeUser(Long userId){
 

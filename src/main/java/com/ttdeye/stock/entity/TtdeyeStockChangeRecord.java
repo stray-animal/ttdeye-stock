@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,34 +45,37 @@ public class TtdeyeStockChangeRecord implements Serializable {
     /**
      * 批次id：无批次则为null
      */
-    private Integer batchId;
+    private Long batchId;
 
+    /**
+     * 批次号
+     */
     private String batchNo;
 
     /**
      * sku原库存
      */
-    private Integer skuBeforeStock;
+    private Long skuBeforeStock;
 
     /**
      * sku变更后库存
      */
-    private Integer skuAfterStock;
+    private Long skuAfterStock;
 
     /**
      * sku批次原库存
      */
-    private Integer skuBatchBeforeStock;
+    private Long skuBatchBeforeStock;
 
     /**
      * sku批次现库存
      */
-    private Integer skuBatchAfterStock;
+    private Long skuBatchAfterStock;
 
     /**
      * 出入库数量：发生量
      */
-    private Integer occurStock;
+    private Long occurStock;
 
     /**
      * 方向：1-入库，0-出库
@@ -84,7 +88,7 @@ public class TtdeyeStockChangeRecord implements Serializable {
     private Integer batchFlag;
 
     /**
-     * 来源：1-人工操作，2-批量导入，3-订单
+     * 来源：1-批量导入SKU，2-采购入库导入，3-批量出库，4，手动入库，5，手动出库
      */
     private Integer sourceType;
 
@@ -135,14 +139,23 @@ public class TtdeyeStockChangeRecord implements Serializable {
     private String spuNo;
 
     /**
-     * 导入文件的id
-     */
-    private Long fileId;
-
-    /**
      * 订单-售卖店铺名称
      */
     private String shopName;
 
+    /**
+     * sku批次库存编号
+     */
+    private String skuBatchNo;
+
+    /**
+     * sku库存主键
+     */
+    private Long skuBatchId;
+
+    /**
+     * 入库单价
+     */
+    private BigDecimal unitPrice;
 
 }

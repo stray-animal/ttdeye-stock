@@ -66,7 +66,7 @@ public class SkuImportDto implements Serializable {
     private BigDecimal degree;
 
     @Excel(name = "采购单价")
-    private BigDecimal purchasePriceDecimal;
+    private BigDecimal purchasePrice;
 
 
     /**
@@ -132,12 +132,12 @@ public class SkuImportDto implements Serializable {
         this.degree = degree;
     }
 
-    public BigDecimal getPurchasePriceDecimal() {
-        return purchasePriceDecimal;
+    public BigDecimal getPurchasePrice() {
+        return purchasePrice;
     }
 
-    public void setPurchasePriceDecimal(BigDecimal purchasePriceDecimal) {
-        this.purchasePriceDecimal = purchasePriceDecimal;
+    public void setPurchasePrice(BigDecimal purchasePrice) {
+        this.purchasePrice = purchasePrice;
     }
 
     public String getRemark() {

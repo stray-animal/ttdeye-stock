@@ -54,7 +54,7 @@ public class BaseController {
         if(!StringUtils.isEmpty(currentStr)){
             current =  Long.valueOf(currentStr);
         }
-        if(StringUtils.isEmpty(sizeStr)){
+        if(!StringUtils.isEmpty(sizeStr)){
             size = Long.valueOf(sizeStr);
         }
         return new Page<T>(current,size);

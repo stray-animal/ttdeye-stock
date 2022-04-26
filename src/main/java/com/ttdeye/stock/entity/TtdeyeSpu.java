@@ -57,7 +57,7 @@ public class TtdeyeSpu implements Serializable {
     private Integer spuAttributesType;
 
     /**
-     * 电商平台：0-全部，1-shopfily
+     * 电商平台：0-其他，1-shopfily
      */
     private Integer eCommercePlatform;
 

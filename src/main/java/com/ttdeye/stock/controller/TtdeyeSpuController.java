@@ -1,13 +1,15 @@
 package com.ttdeye.stock.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
-import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.domain.dto.GoodsInfoDto;
 import com.ttdeye.stock.domain.dto.req.GoodsListReq;
+import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeSpu;
 import com.ttdeye.stock.entity.TtdeyeUser;
+import com.ttdeye.stock.service.ITtdeyeSkuService;
 import com.ttdeye.stock.service.ITtdeyeSpuService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Date;
 
 /**
- * <p>
- * 商品信息表 前端控制器
- * </p>
+ * 商品信息（SPU）
  *
  * @author 张永明
  * @since 2022-04-25
@@ -32,6 +32,11 @@ public class TtdeyeSpuController extends BaseController {
 
     @Autowired
     private ITtdeyeSpuService iTtdeyeSpuService;
+
+    @Autowired
+    private ITtdeyeSkuService iTtdeyeSkuService;
+
+
 
     /**
      * 新增SPU
@@ -76,8 +81,8 @@ public class TtdeyeSpuController extends BaseController {
     @PostMapping(value = "getList")
     public ApiResponseT<Page<GoodsInfoDto>> getList(@RequestBody GoodsListReq goodsListReq){
         Page page = getPage();
-//        Page<GoodsInfoDto> result = iTtdeyeSpuService.selectListPage(page, goodsListReq);
-        return ApiResponseT.ok(null);
+        Page<GoodsInfoDto> result = iTtdeyeSpuService.selectGoodsInfoDtoListPage(page, goodsListReq);
+        return ApiResponseT.ok(result);
     }
 
 
@@ -95,6 +100,9 @@ public class TtdeyeSpuController extends BaseController {
 
     /**
      * 批量导入SPU
+     * @param multipartFile
+     * @return
+     * @throws Exception
      */
     @PostMapping(value = "/spuImport")
     public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
@@ -102,6 +110,33 @@ public class TtdeyeSpuController extends BaseController {
         ApiResponseT apiResponseT =  iTtdeyeSpuService.spuImport(multipartFile,ttdeyeUser);
         return apiResponseT;
     }
+
+
+    /**
+     * 删除Spu
+     * @param spuId
+     * @return
+     */
+    @GetMapping(value = "/deleteSpu")
+    public ApiResponseT deleteSpu(Long spuId){
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        //如果存在生效的sku，则不允许删除spu
+       Long skuCount =  iTtdeyeSkuService.count(Wrappers.<TtdeyeSku>lambdaQuery()
+                .eq(TtdeyeSku::getDeleteFlag,0)
+               .eq(TtdeyeSku::getSpuId,spuId));
+        if(skuCount > 0){
+            return ApiResponseT.failed("SPU下有未删除的SKU，不允许删除！");
+        }
+        TtdeyeSpu ttdeyeSpu = new TtdeyeSpu();
+        ttdeyeSpu.setSpuId(spuId);
+        ttdeyeSpu.setDeleteFlag(1);
+        ttdeyeSpu.setUpdateTime(new Date());
+        ttdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
+        iTtdeyeSpuService.updateById(ttdeyeSpu);
+        return ApiResponseT.ok();
+    }
+
+
 
 
 
