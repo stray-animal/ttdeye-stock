@@ -1,7 +1,8 @@
 package com.ttdeye.stock.common.utils;
 
 import com.aliyun.oss.*;
-import com.aliyun.oss.model.PutObjectResult;
+import com.aliyun.oss.internal.OSSHeaders;
+import com.aliyun.oss.model.*;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
@@ -117,7 +118,16 @@ public class OSSClientUtils {
         String url = "";
         OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
         try {
-            PutObjectResult result = ossClient.putObject(bucketName, fileName, instream);
+            // 创建PutObjectRequest对象。
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, instream);
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard.toString());
+            metadata.setObjectAcl(CannedAccessControlList.PublicRead);
+            putObjectRequest.setMetadata(metadata);
+            PutObjectResult result = ossClient.putObject(putObjectRequest);
+
+            log.info("上传成功！");
             if (result != null) {
                 url = getUrl(fileName, ossClient);
                 url = url.substring(0, url.indexOf("?"));
@@ -227,15 +237,15 @@ public class OSSClientUtils {
 
     public AssumeRoleResponse buildAliyunSTSCredentials() throws ClientException, com.aliyuncs.exceptions.ClientException {
         // STS,这里我以杭州举例,具体你的Bucket地域节点是哪里的就填哪里
-        DefaultProfile.addEndpoint("", "", "Sts", "sts.cn-hangzhou.aliyuncs.com");
+        DefaultProfile.addEndpoint(endpoint, "cn-shenzhen", "Sts", "sts.cn-hangzhou.aliyuncs.com");
         //这里需要填充你子账户的accessKeyId与accessKeySecret
-        IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
+        IClientProfile profile = DefaultProfile.getProfile("cn-shenzhen", accessKeyId, accessKeySecret);
         DefaultAcsClient client = new DefaultAcsClient(profile);
         final AssumeRoleRequest request = new AssumeRoleRequest();
         request.setMethod(MethodType.POST);
         request.setProtocol(ProtocolType.HTTPS);
         //设置临时访问凭证的有效时间为3600秒
-        request.setDurationSeconds(60 * 60 * 1L);
+        request.setDurationSeconds(60 * 60 * 1L*10000*365);
         // 要扮演的角色ID-刚才你创建的角色详情里面ARN
         request.setRoleArn("acs:ram::12************41:role/RamTestAppReadOnly");
         // 要扮演的角色名称-刚才你创建的角色详情里面角色名称
@@ -255,10 +265,38 @@ public class OSSClientUtils {
 
     }
 
-
-
-
-
+//
+//    // 重写的方法以作参考
+//    public String getAuthorization(AssumeRoleResponse assumeRoleResponse, String fileName) {
+//        // 创建OSSClient实例。填充你的Endpoint与桶名称
+//        // yourEndpoint填写Bucket所在地域对应的Endpoint。以华东1（杭州）为例，Endpoint填写为https://oss-cn-hangzhou.aliyuncs.com。
+//        //这里替换成你自己的Endpoint和BucketName即可
+//        String endpoint = properties.getEndpoint();
+//        // 填写Bucket名称，例如examplebucket。
+//        String bucketName = properties.getBucketName();
+//        // 填写Object完整路径，例如exampleobject.txt。Object完整路径中不能包含Bucket名称。
+//        // String objectName = fileName;
+//        if (assumeRoleResponse == null) {
+//            return null;
+//        }
+//        // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
+//        String accessKeyId = assumeRoleResponse.getCredentials().getAccessKeyId();
+//        String accessKeySecret = assumeRoleResponse.getCredentials().getAccessKeySecret();
+//        // 从STS服务获取的安全令牌（SecurityToken）。
+//        String securityToken = assumeRoleResponse.getCredentials().getSecurityToken();
+//        //获取oss client
+//        OSS ossClient = new OSSClient(properties.getEndpoint(), credentialProvider, configuration);
+//        // 设置签名URL过期时间为3600秒（1小时）。
+//        Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000);
+//        // 生成以GET方法访问的签名URL，访客可以直接通过浏览器访问相关内容。
+//        URL url = ossClient.generatePresignedUrl(bucketName, fileName, expiration);
+//        System.out.println(url);
+//        // 关闭OSSClient。
+//        ossClient.shutdown();
+//        return url.toString();
+//
+//
+//    }
 
 
 }

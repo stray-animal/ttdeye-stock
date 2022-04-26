@@ -52,7 +52,7 @@ logging:
 
 
 #阿里云OSS相关
-aliyun_endpoint: oss-cn-shenzhen.aliyuncs.com
+aliyun_endpoint: https://oss-cn-shenzhen.aliyuncs.com
 aliyun_accessKeyId: LTAI5t8tLQk4LpvRDN6hAzZ4
 aliyun_accessKeySecret: OMFXGtVLGRyeXZSB7X6Wvy5yRw5hZu
 aliyun_bucketName: ttdeye-inventory-manager
