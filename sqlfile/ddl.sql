@@ -65,7 +65,9 @@ create table ttdeye_sku
     source_type          int           default 1                 not null comment '1-手动添加；2-文件导入',
     state                int           default 1                 not null comment '状态：1-在售，2-已下架，3-缺货下架',
     spu_id               bigint        default 0                 not null comment 'spuId',
-    spu_code             varchar(64)   default ''                not null comment 'spu编码'
+    spu_no               varchar(64)   default ''                not null comment 'spu编码',
+    delete_flag          int           default 0                 not null comment '是否删除：1-删除，0-未删除',
+    sku_no               varchar(64)   default ''                not null comment 'SKU编号'
 )
     comment '产品信息表SKU';
 
@@ -74,14 +76,15 @@ create table ttdeye_sku_batch
     sku_batch_id      bigint auto_increment comment 'sku库存批次表主键'
         primary key,
     sku_id            bigint                                null comment 'skuid',
-    sku_code          varchar(64) default ''                not null comment 'sku编码',
-    batch_id          int                                   null comment '批次id',
+    sku_no            varchar(64) default ''                not null comment 'sku编号',
+    batch_id          bigint                                null comment '批次id',
     batch_no          varchar(64) default ''                not null comment '批次编号',
     stock_current_num bigint      default 0                 not null comment '批次实时库存',
     stock_all_num     bigint      default 0                 not null comment '批次总入库数量',
     stock_out_num     bigint      default 0                 not null comment '批次总出库数量',
     create_time       timestamp   default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time       timestamp                             null comment '更新时间'
+    update_time       timestamp                             null comment '更新时间',
+    sku_batch_no      varchar(64) default ''                not null comment 'sku批次库存编号'
 )
     comment 'sku库存批次表';
 
@@ -102,22 +105,22 @@ create table ttdeye_sku_shop_detail
 
 create table ttdeye_spu
 (
-    spu_id              bigint auto_increment comment 'spuId'
+    spu_id               bigint auto_increment comment 'spuId'
         primary key,
-    spu_code            varchar(64)  default ''                not null comment '商品编码',
-    title_ch            varchar(64)  default ''                not null comment '中文名称',
-    title_en            varchar(64)  default ''                not null comment '英文名称',
-    purchase_url        varchar(128) default ''                not null comment '采购链接',
-    spu_attributes_type int          default 1                 not null comment '1-普通货',
-    e_commerce_platform int          default 1                 not null comment '电商平台：0-全部，1-shopfily',
-    remark              varchar(256) default ''                not null comment '备注',
-    create_time         timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
-    update_time         timestamp                              null comment '更新时间',
-    update_login_name   varchar(64)  default ''                not null comment '更新人账号',
-    spu_nick_name       varchar(64)  default ''                not null comment '商品代码或昵称',
-    delete_flag         int          default 0                 not null comment '是否删除：1-删除，0-未删除',
-    source_type         int          default 1                 not null comment '来源：1-手动录入，2-文件导入',
-    batch_flag          int          default 0                 not null comment '是否支持批次：1-支持，0-不支持'
+    spu_code             varchar(64)  default ''                not null comment '商品编码',
+    title_ch             varchar(64)  default ''                not null comment '中文名称',
+    title_en             varchar(64)  default ''                not null comment '英文名称',
+    purchase_url         varchar(128) default ''                not null comment '采购链接',
+    spu_attributes_type  int          default 1                 not null comment '1-普通货',
+    e_commerce_platform  int          default 1                 not null comment '电商平台：0-全部，1-shopfily',
+    remark               varchar(256) default ''                not null comment '备注',
+    create_time          timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time          timestamp                              null comment '更新时间',
+    update_login_account varchar(64)  default ''                not null comment '更新人账号',
+    delete_flag          int          default 0                 not null comment '是否删除：1-删除，0-未删除',
+    source_type          int          default 1                 not null comment '来源：1-手动录入，2-文件导入',
+    batch_flag           int          default 0                 not null comment '是否支持批次：1-支持，0-不支持',
+    spu_no               varchar(64)                            not null comment 'SPU编号'
 )
     comment '商品信息表';
 
@@ -126,7 +129,7 @@ create table ttdeye_stock_change_record
     record_id              bigint auto_increment comment '库存变更记录id'
         primary key,
     sku_id                 bigint       default 0                 not null comment 'skuId',
-    sku_code               varchar(64)  default ''                not null comment 'sku编码',
+    sku_no                 varchar(64)  default ''                not null comment 'sku编码',
     batch_id               int                                    null comment '批次id：无批次则为null',
     batch_no               varchar(64)                            null,
     sku_before_stock       int          default 0                 not null comment 'sku原库存',
@@ -145,7 +148,7 @@ create table ttdeye_stock_change_record
     create_nike_name       varchar(64)  default ''                not null comment '创建人姓名',
     delete_flag            int          default 0                 not null comment '是否删除：1-已删除，0-未删除',
     spu_id                 bigint       default 0                 not null comment '商品id',
-    spu_code               varchar(64)                            not null comment '商品编码',
+    spu_no                 varchar(64)                            not null comment '商品编码',
     file_id                bigint                                 not null comment '导入文件的id',
     shop_name              varchar(64)  default ''                not null comment '订单-售卖店铺名称'
 )
@@ -175,4 +178,5 @@ create table ttdeye_user
 
 
 
-INSERT INTO `ttdeye-stock`.ttdeye_user (user_id, user_code, nick_name, login_account, login_password, state, delete_flag, create_time, update_time, update_user_account, admin_flag, phone) VALUES (1, '1242144', 'admin', 'admin', 'a7fa33ff8f0b5068', 1, 0, '2022-04-25 18:58:47', '2022-04-25 18:58:49', 'admin', 1, '18600285979');
+
+INSERT INTO ttdeye_user (user_id, user_code, nick_name, login_account, login_password, state, delete_flag, create_time, update_time, update_user_account, admin_flag, phone) VALUES (1, '1242144', 'admin', 'admin', 'a7fa33ff8f0b5068', 1, 0, '2022-04-25 18:58:47', '2022-04-25 18:58:49', 'admin', 1, '18600285979');

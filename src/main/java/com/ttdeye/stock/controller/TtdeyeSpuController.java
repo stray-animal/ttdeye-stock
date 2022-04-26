@@ -98,7 +98,6 @@ public class TtdeyeSpuController extends BaseController {
      */
     @PostMapping(value = "/spuImport")
     public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
-
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         ApiResponseT apiResponseT =  iTtdeyeSpuService.spuImport(multipartFile,ttdeyeUser);
         return apiResponseT;

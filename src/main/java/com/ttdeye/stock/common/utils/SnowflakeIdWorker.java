@@ -1,4 +1,4 @@
-package com.newlink.platform.common.utils;
+package com.ttdeye.stock.common.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
@@ -201,6 +201,11 @@ public class SnowflakeIdWorker {
     public static Long generateId(){
         long id = idWorker.nextId();
         return id;
+    }
+
+    public static String  generateIdStr(){
+        long id = idWorker.nextId();
+        return String.valueOf(id);
     }
 
     public static void main(String[] args) throws Exception {

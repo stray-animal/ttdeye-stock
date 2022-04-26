@@ -77,7 +77,6 @@ public class TtdeyeSkuController extends BaseController {
      */
     @PostMapping(value = "/skuImport")
     public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
-
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         ApiResponseT apiResponseT =  iTtdeyeSkuService.spuImport(multipartFile,ttdeyeUser);
         return apiResponseT;

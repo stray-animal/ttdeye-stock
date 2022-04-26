@@ -47,8 +47,16 @@ public class BaseController {
 
 
     public Page<T> getPage(){
-        Long current = Long.valueOf(request.getParameter("current"));
-        Long size = Long.valueOf(request.getParameter("size"));
+        String currentStr = request.getParameter("current");
+        String sizeStr = request.getParameter("size");
+        Long current = 1L;
+        Long size = 20L;
+        if(!StringUtils.isEmpty(currentStr)){
+            current =  Long.valueOf(currentStr);
+        }
+        if(StringUtils.isEmpty(sizeStr)){
+            size = Long.valueOf(sizeStr);
+        }
         return new Page<T>(current,size);
     }
 

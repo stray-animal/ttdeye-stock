@@ -7,20 +7,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
+import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
 import com.ttdeye.stock.domain.dto.poi.SkuImportDto;
-import com.ttdeye.stock.entity.TtdeyeFileLog;
-import com.ttdeye.stock.entity.TtdeyeSku;
-import com.ttdeye.stock.entity.TtdeyeSpu;
-import com.ttdeye.stock.entity.TtdeyeUser;
-import com.ttdeye.stock.mapper.TtdeyeFileLogMapper;
-import com.ttdeye.stock.mapper.TtdeyeSkuMapper;
-import com.ttdeye.stock.mapper.TtdeyeSpuMapper;
+import com.ttdeye.stock.entity.*;
+import com.ttdeye.stock.mapper.*;
 import com.ttdeye.stock.service.ITtdeyeSkuService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,12 +55,20 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
     @Autowired
     private TtdeyeSpuMapper ttdeyeSpuMapper;
 
+    @Autowired
+    private TtdeyeBatchMapper ttdeyeBatchMapper;
+
+    @Autowired
+    private TtdeyeSkuBatchMapper ttdeyeSkuBatchMapper;
+
+
     /**
      * 导入SKU
      * @param multipartFile
      * @param ttdeyeUser
      * @return
      */
+    @Transactional
     public ApiResponseT spuImport(MultipartFile multipartFile, TtdeyeUser ttdeyeUser) throws Exception {
 
         ImportParams params = new ImportParams();
@@ -82,7 +87,6 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             if(StringUtils.isEmpty(skuImportDto.getSpuCode()) && StringUtils.isEmpty(skuImportDto.getSpuNo())){
                 return ApiResponseT.failed("第"+line+"行,SKU代码或编号至少一项必填！");
             }
-
             //SKU代码是否重复
             Long count = ttdeyeSkuMapper.selectCount(Wrappers.<TtdeyeSku>lambdaQuery()
                     .eq(TtdeyeSku::getDeleteFlag,0)
@@ -102,33 +106,45 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             if(ttdeyeSpu.getBatchFlag() == 1 && StringUtils.isEmpty(skuImportDto.getBatchNo())){
                 return ApiResponseT.failed("第"+line+"行,批次商品，必须填写批次号！");
             }
-        }
 
-
-
-        for (SkuImportDto skuImportDto : skuImportDtoList) {
-
-
-
-        }
-        //导入SKU
-        for (SkuImportDto skuImportDto : skuImportDtoList) {
+            //创建SKU信息
             TtdeyeSku ttdeyeSku = new TtdeyeSku();
             BeanUtils.copyProperties(skuImportDto,ttdeyeSku);
+            ttdeyeSku.setSkuNo(SnowflakeIdWorker.generateIdStr());
             ttdeyeSku.setUpdateTime(new Date());
             ttdeyeSku.setCreateTime(new Date());
             ttdeyeSku.setSourceType(2);
             ttdeyeSku.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
             ttdeyeSku.setStockAllNum(skuImportDto.getStockNum());
             ttdeyeSku.setStockCurrentNum(skuImportDto.getStockNum());
+            ttdeyeSku.setSpuNo(ttdeyeSpu.getSpuNo());
+            ttdeyeSku.setSpuId(ttdeyeSpu.getSpuId());
             //保存SPU信息
             ttdeyeSkuMapper.insert(ttdeyeSku);
+
+            //如果是批次商品
+            if(ttdeyeSpu.getBatchFlag() == 1){
+                TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                        Wrappers.<TtdeyeBatch>lambdaQuery()
+                                .eq(TtdeyeBatch::getDeleteFlag,0)
+                                .eq(TtdeyeBatch::getBatchNo,skuImportDto.getBatchNo())
+                ) ;
+
+                //保存批次库存信息
+                TtdeyeSkuBatch ttdeyeSkuBatch = new TtdeyeSkuBatch();
+                ttdeyeSkuBatch.setSkuId(ttdeyeSku.getSkuId());
+                ttdeyeSkuBatch.setSkuNo(ttdeyeSku.getSkuNo());
+                ttdeyeSkuBatch.setBatchId(ttdeyeBatch.getBatchId());
+                ttdeyeSkuBatch.setBatchNo(skuImportDto.getBatchNo());
+                ttdeyeSkuBatch.setStockCurrentNum(skuImportDto.getStockNum());
+                ttdeyeSkuBatch.setStockAllNum(skuImportDto.getStockNum());
+                ttdeyeSkuBatch.setStockOutNum(0L);
+                ttdeyeSkuBatch.setCreateTime(new Date());
+                ttdeyeSkuBatch.setUpdateTime(new Date());
+                ttdeyeSkuBatch.setSkuBatchNo(SnowflakeIdWorker.generateIdStr());
+                ttdeyeSkuBatchMapper.insert(ttdeyeSkuBatch);
+            }
         }
-
-        //判断如果是批次商品则更创建批次库存
-
-
-
 
         //SPU保存完成，保存上传文件记录
         String url = ossClientUtils.uploadImg2Oss(multipartFile);
@@ -140,12 +156,6 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
         ttdeyeFileLogMapper.insert(ttdeyeFileLog);
 
         return ApiResponseT.ok();
-
-
-
-
-
-
     }
 
 

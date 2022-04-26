@@ -46,11 +46,6 @@ public class TtdeyeUserController extends BaseController {
 
         String username = userLoginDto.getLoginAccount();
         String password = userLoginDto.getLoginPassword();
-        //update-begin--Author:scott  Date:20190805 for：暂时注释掉密码加密逻辑，有点问题
-
-        //update-begin--Author:scott  Date:20190805 for：暂时注释掉密码加密逻辑，有点问题
-
-        //update-begin-author:taoyan date:20190828 for:校验验证码
 
         //1. 校验用户是否有效
         TtdeyeUser sysUser = ttdeyeUserService.getOne(new QueryWrapper<TtdeyeUser>().lambda().eq(TtdeyeUser::getLoginAccount, username).eq(TtdeyeUser::getDeleteFlag,0).eq(TtdeyeUser::getState,1));
@@ -58,8 +53,7 @@ public class TtdeyeUserController extends BaseController {
         if(sysUser == null ) {
            return ApiResponseT.failed();
         }
-
-        //前端密码加密，后端进行密码解密
+        //前端密码名文
         String userpassword = PasswordUtil.encrypt(username, password, SALT);
         //2. 校验用户名或密码是否正确
 
@@ -140,8 +134,6 @@ public class TtdeyeUserController extends BaseController {
         TtdeyeUser ttdeyeUser = ttdeyeUserService.getOne(new QueryWrapper<TtdeyeUser>().lambda().eq(TtdeyeUser::getUserId, userId));
         return ApiResponseT.ok(ttdeyeUser);
     }
-
-
 
 
 

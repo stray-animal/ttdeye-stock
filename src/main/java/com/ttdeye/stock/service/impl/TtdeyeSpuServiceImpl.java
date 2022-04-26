@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
+import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
 import com.ttdeye.stock.domain.dto.poi.SpuImportDto;
 import com.ttdeye.stock.entity.TtdeyeFileLog;
 import com.ttdeye.stock.entity.TtdeyeSpu;
@@ -80,19 +81,18 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
             if(count > 0){
                 return ApiResponseT.failed("第"+line+"行,SKU代码商品代码"+spuImportDto.getSpuCode()+"已存在,请修改后重新上传！");
             }
-        }
-
-        for (SpuImportDto spuImportDto : spuImportDtoList) {
             TtdeyeSpu ttdeyeSpu = new TtdeyeSpu();
             BeanUtils.copyProperties(spuImportDto,ttdeyeSpu);
             ttdeyeSpu.setUpdateTime(new Date());
             ttdeyeSpu.setCreateTime(new Date());
             ttdeyeSpu.setSourceType(2);
             ttdeyeSpu.setSpuAttributesType(1);
+            ttdeyeSpu.setSpuNo(SnowflakeIdWorker.generateIdStr());
             ttdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
             //保存SPU信息
             ttdeyeSpuMapper.insert(ttdeyeSpu);
         }
+
         //SPU保存完成，保存上传文件记录
         String url = ossClientUtils.uploadImg2Oss(multipartFile);
         TtdeyeFileLog ttdeyeFileLog = new TtdeyeFileLog();

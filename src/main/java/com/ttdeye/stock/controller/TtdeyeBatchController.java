@@ -1,14 +1,13 @@
 package com.ttdeye.stock.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
-import com.ttdeye.stock.common.utils.PasswordUtil;
 import com.ttdeye.stock.entity.TtdeyeBatch;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.service.ITtdeyeBatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.ttdeye.stock.common.base.controller.BaseController;
 
 import java.util.Date;
 
@@ -57,7 +56,7 @@ public class TtdeyeBatchController extends BaseController {
 
     /**
      * 分页查询批次列表
-     * @param TtdeyeBatch
+     * @param ttdeyeBatch
      * @param current 当前页数
      * @Param size 每页条数
      * @return

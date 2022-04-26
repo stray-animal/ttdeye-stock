@@ -44,7 +44,7 @@ public class TtdeyeSkuBatch implements Serializable {
     /**
      * 批次id
      */
-    private Integer batchId;
+    private Long batchId;
 
     /**
      * 批次编号
