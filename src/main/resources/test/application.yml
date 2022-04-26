@@ -1,0 +1,85 @@
+#  servlet:
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8081
+#    context-path: /ttdeye-stock
+
+
+spring:
+  application:
+    name: ttdeye-stock
+  datasource:
+    url: jdbc:mysql://49.232.159.226:3306/ttdeye-stock-test?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&serverTimezone=CTT
+    username: ttdeye-stock-test
+    password: budinglingyang-test
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      max-lifetime: 1800000
+      minimum-idle: 5
+      connection-init-sql: SET NAMES utf8mb4
+  redis:
+    host: 49.232.159.226
+    port: 6379
+    password: budinglingyang
+    database: 1
+
+redis:
+  # redis统一前缀
+  prefix: ttdeye-stock-test
+  # redis 分隔符
+  separator: ':'
+
+#mybatis
+mybatis:
+  mapperLocations: classpath:com/welfare/pet/wepet/orm/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+#pagehelper
+pagehelper:
+  offset-as-page-num: true
+  helperDialect: mysql
+#  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+tencent:
+  cos:
+    app-id: 1300327988
+    secret-id: AKIDf6LNAi2DGBrITPnez50f8NM6e2B8FNgl
+    secret-key: znOjwwkIbfdMp8D4f08A0b4IMBm8KJ3h
+    bucket-name: budinglingyang
+
+
+wx:
+  applets:
+    app-id: wxcea970c20331107f
+    secret: 1b7f6f5ca898ec6963cee166a5a662f4
+
+
+# 日志配置
+#debug: false
+#logging:
+#  config: classpath:logback-ttdeye-stock.xml
+
+# logback 配置
+logback:
+  # 日志路径
+  path: /data/logs/ttdeye-stock
+  # 日志级别
+  root-level: INFO
+  # 文件的最大数量
+  max-history: 50
+  # 文件的最大文件大小
+  max-file-size: 10MB
+  # 日志字符编码
+  charset: UTF-8
+  # 日志格式
+  console-pattern: '%d{yyyy-MM-dd HH:mm:ss.SSS} %boldYellow([%thread]) %highlight(%-5level) %boldGreen(%logger{50}.%M\(%F:%L\)) - %msg%n'
+  file-pattern: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+  # 控制日志是否在控制台打印,默认打印
+  output-console: true

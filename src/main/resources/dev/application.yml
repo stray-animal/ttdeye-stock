@@ -1,0 +1,59 @@
+#  servlet:
+server:
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8081
+#    context-path: /ttdeye-stock
+
+
+spring:
+  application:
+    name: ttdeye-stock
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/ttdeye-stock?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&serverTimezone=CTT
+    username: psi
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      max-lifetime: 1800000
+      minimum-idle: 5
+      connection-init-sql: SET NAMES utf8mb4
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 0
+
+redis:
+  # redis统一前缀
+  prefix: ttdeye-stock
+  # redis 分隔符
+  separator: ':'
+
+
+##pagehelper
+#pagehelper:
+#  offset-as-page-num: true
+#  helperDialect: mysql
+#  #  reasonable: true
+#  supportMethodsArguments: true
+#  params: count=countSql
+
+
+
+logging:
+  file:
+    name: /Users/zhangyongming/data/logs/ttdeye-stock.log
+  level:
+    com.ttdeye.stock.mapper: debug
+
+
+#阿里云OSS相关
+aliyun_endpoint: oss-cn-shenzhen.aliyuncs.com
+aliyun_accessKeyId: LTAI5t8tLQk4LpvRDN6hAzZ4
+aliyun_accessKeySecret: OMFXGtVLGRyeXZSB7X6Wvy5yRw5hZu
+aliyun_bucketName: ttdeye-inventory-manager
+

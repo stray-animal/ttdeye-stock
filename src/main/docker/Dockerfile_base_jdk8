@@ -1,0 +1,61 @@
+FROM openjdk:8-jdk-alpine3.15
+#更新Alpine的软件源为国内（清华大学）的站点，因为从默认官源拉取实在太慢了。。。
+RUN echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.8/main/" > /etc/apk/repositories
+ 
+RUN apk update \
+        && apk upgrade \
+        && apk add --no-cache bash \
+        bash-doc \
+        bash-completion \
+        vim curl tree tzdata libressl fontconfig ttf-dejavu font-adobe-100dpi \
+        && rm -rf /var/cache/apk/* \
+        && /bin/bash
+RUN apk update \
+        && apk upgrade \
+        && apk add --no-cache fontconfig mkfontscale \
+        && rm -rf /usr/share/fonts/xpfonts \
+        && mkdir -p /usr/share/fonts/xpfonts
+
+ADD zt /usr/share/fonts/xpfonts
+RUN cd /usr/share/fonts/xpfonts && \
+    mkfontscale && \
+    mkfontdir && \
+    fc-cache -fv && \
+    fc-list
+
+ENV LANG en_US.UTF-8
+ENV LC_CTYPE en_US.UTF-8
+# 时区问题
+ENV TIME_ZONE Asia/Shanghai
+RUN echo "${TIME_ZONE}" > /etc/timezone \
+    && cp /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime
+# 写入基础命令
+RUN  echo "alias l.='/bin/ls -d .* '" >>/etc/profile \
+    && echo "alias ll='/bin/ls -l '" >>/etc/profile \
+    && echo "alias ls='/bin/ls -aol'" >>/etc/profile
+# 定义项目信息
+### 默认启动账户
+ENV APP_USER             work
+ENV APP_GROUP            work
+ENV APP_UID             1000
+ENV APP_GID            1000
+### 应用启动相关
+#### 端口变量等
+
+# 直接输出到当前 终端
+ENV LOG_OUTPUT            /dev/stdout 
+# 初始化 工作用户
+RUN addgroup -g ${APP_GID} ${APP_GROUP} \
+    && adduser -h "$JENKINS_HOME" -u ${APP_UID} -G ${APP_GROUP} -s /bin/bash -D ${APP_USER}
+
+#### 基础目录
+# 项目信息
+ENV Projects="psi"
+ENV Dir_Projects="/data/service/${Projects}"
+ENV Dir_Projects_Data="${Dir_Projects}/Data"
+ENV Dir_Projects_App="${Dir_Projects}/execs/${APP_NAME}"
+
+
+
+# docker build  -t docker-registry.xcauto.com/xcauto/xcauto_openjdk:8-jdk-alpine_06 .
+# docker push docker-registry.xcauto.com/xcauto/xcauto_openjdk:8-jdk-alpine_06
