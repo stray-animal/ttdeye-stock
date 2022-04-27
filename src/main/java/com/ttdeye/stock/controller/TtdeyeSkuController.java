@@ -154,10 +154,10 @@ public class TtdeyeSkuController extends BaseController {
 
 
     /**
-     * 手动出
+     * 手动出库
      * @return
      */
-    @RequestMapping(value = "skuOperaWarehousing")
+    @PostMapping(value = "skuOperaWarehousing")
     public ApiResponseT skuOperaOutOfStock(@RequestBody SkuOutOfStockReq skuOutOfStockReq){
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSkuService.skuOperaOutOfStock(skuOutOfStockReq,ttdeyeUser);
