@@ -228,12 +228,8 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
      * @param skuExportReq
      * @return
      */
-   public List<SkuExportDto> selectExportData(SkuExportReq skuExportReq){
-
-
-      List<SkuExportDto> ttdeyeSkus = ttdeyeSkuMapper.selectExportData(skuExportReq);
-
-
+    public List<SkuExportDto> selectExportData(SkuExportReq skuExportReq) {
+        List<SkuExportDto> ttdeyeSkus = ttdeyeSkuMapper.selectExportData(skuExportReq);
         return ttdeyeSkus;
     }
 
