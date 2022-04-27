@@ -17,9 +17,17 @@
 */data/mysql/data*
 ### 3,上传docker-compose.yml
 
-### 4,项目构建
-*1，
+### 4，项目构建
+*1，分别执行maven clean install、maven docker:bulid、maven docker:push（此时已将项目镜像打包上传到docker hub）
+ 
+### 5，使用docker-compose 启动依赖容器
 
+### 6，初始化数据库
+
+### 7，使用docker-compose 启动ttdeye-stock
+
+### 8，配置nginx反向代理等
+        
 
 
 
