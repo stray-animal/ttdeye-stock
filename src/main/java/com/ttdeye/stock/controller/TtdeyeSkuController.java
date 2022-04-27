@@ -5,7 +5,6 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
-import com.ttdeye.stock.domain.dto.poi.SkuWarehousingDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
 import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
 import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
@@ -94,15 +93,7 @@ public class TtdeyeSkuController extends BaseController {
     }
 
 
-    /**
-     * 批量导入SKU
-     */
-    @PostMapping(value = "/skuImport")
-    public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
-        TtdeyeUser ttdeyeUser = getTtdeyeUser();
-        ApiResponseT apiResponseT =  iTtdeyeSkuService.spuImport(multipartFile,ttdeyeUser);
-        return apiResponseT;
-    }
+
 
 
     /**
@@ -121,6 +112,19 @@ public class TtdeyeSkuController extends BaseController {
         iTtdeyeSkuService.updateById(ttdeyeSku);
         return ApiResponseT.ok();
     }
+
+
+
+    /**
+     * 批量导入SKU
+     */
+    @PostMapping(value = "/skuImport")
+    public ApiResponseT spuImport(@RequestParam("file") MultipartFile multipartFile) throws Exception {
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        ApiResponseT apiResponseT =  iTtdeyeSkuService.spuImport(multipartFile,ttdeyeUser);
+        return apiResponseT;
+    }
+
 
 
     /**
@@ -152,7 +156,6 @@ public class TtdeyeSkuController extends BaseController {
     }
 
 
-
     /**
      * 手动出库
      * @return
@@ -175,10 +178,8 @@ public class TtdeyeSkuController extends BaseController {
     @PostMapping(value = "skuOutOfStock")
     public ApiResponseT skuOutOfStock(@RequestParam("file") MultipartFile multipartFile) throws Exception {
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
-
         ApiResponseT apiResponseT = iTtdeyeSkuService.skuOutOfStock(multipartFile,ttdeyeUser);
-
-        return ApiResponseT.ok();
+        return apiResponseT;
     }
 
 
