@@ -1,4 +1,5 @@
 package com.ttdeye.stock.service.impl;
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
@@ -12,8 +13,11 @@ import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.poi.SkuImportDto;
+import com.ttdeye.stock.domain.dto.poi.SkuOutOfStockDto;
 import com.ttdeye.stock.domain.dto.poi.SkuWarehousingDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
+import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
+import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
 import com.ttdeye.stock.entity.*;
 import com.ttdeye.stock.mapper.*;
 import com.ttdeye.stock.service.ITtdeyeFileLogService;
@@ -235,6 +239,23 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
 
 
     /**
+     * sku手动入库
+     * @param skuWarehousingReq
+     * @param ttdeyeUser
+     */
+    public void skuOperaWarehousing(SkuWarehousingReq skuWarehousingReq, TtdeyeUser ttdeyeUser){
+        //SKU代码是否重复
+        TtdeyeSku ttdeyeSku = ttdeyeSkuMapper.selectById(skuWarehousingReq.getSkuId());
+
+        //查询SPU信息
+        TtdeyeSpu ttdeyeSpu = ttdeyeSpuMapper.selectOne(Wrappers.<TtdeyeSpu>lambdaQuery()
+                .eq(TtdeyeSpu::getDeleteFlag,0)
+                .eq(TtdeyeSpu::getSpuId,ttdeyeSku.getSpuId())
+        );
+        this.skuWareHousing(ttdeyeUser,skuWarehousingReq,ttdeyeSku,ttdeyeSpu,null);
+    }
+
+    /**
      * 采购入库
      * @param multipartFile
      * @param ttdeyeUser
@@ -301,7 +322,6 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
         TtdeyeSku ttdeyeSkuNew = new TtdeyeSku();
         ttdeyeSkuNew.setStockCurrentNum(ttdeyeSku.getStockCurrentNum() + skuWarehousingDto.getStockNum());
         ttdeyeSkuNew.setStockAllNum(ttdeyeSkuNew.getStockAllNum() + skuWarehousingDto.getStockNum());
-        ttdeyeSkuNew.setPurchasePrice(skuWarehousingDto.getUnitPrice());
         ttdeyeSkuNew.setUpdateTime(new Date());
         ttdeyeSkuNew.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
         ttdeyeSkuNew.setSkuId(ttdeyeSku.getSkuId());
@@ -374,6 +394,193 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
 
         }
         ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
+    }
+
+
+
+    public void skuOperaOutOfStock(SkuOutOfStockReq skuOutOfStockReq, TtdeyeUser ttdeyeUser){
+
+        //SKU代码是否重复
+        TtdeyeSku ttdeyeSku = ttdeyeSkuMapper.selectById(skuOutOfStockReq.getSkuId());
+
+        //查询SPU信息
+        TtdeyeSpu ttdeyeSpu = ttdeyeSpuMapper.selectOne(Wrappers.<TtdeyeSpu>lambdaQuery()
+                .eq(TtdeyeSpu::getDeleteFlag,0)
+                .eq(TtdeyeSpu::getSpuId,ttdeyeSku.getSpuId())
+        );
+
+
+        this.skuOutOfStock(ttdeyeUser,skuOutOfStockReq,ttdeyeSku,null,ttdeyeSpu);
+    }
+
+
+    public ApiResponseT skuOutOfStock(MultipartFile multipartFile, TtdeyeUser ttdeyeUser) throws Exception {
+        ImportParams params = new ImportParams();
+        params.setHeadRows(1);
+        List<SkuOutOfStockDto> skuOutOfStockDtos = ExcelImportUtil.importExcel(multipartFile.getInputStream(), SkuOutOfStockDto.class,  params);
+
+        if(CollectionUtils.isEmpty(skuOutOfStockDtos)){
+            return ApiResponseT.failed("不能导入空文件！");
+        }
+        //文件校验
+        for (int i = 0; i < skuOutOfStockDtos.size(); i++) {
+            Integer line = i+1;
+            SkuOutOfStockDto skuOutOfStockDto = skuOutOfStockDtos.get(i);
+            TtdeyeSku ttdeyeSku = ttdeyeSkuMapper.selectOne(Wrappers.<TtdeyeSku>lambdaQuery()
+                    .eq(TtdeyeSku::getDeleteFlag,0)
+                    .eq(TtdeyeSku::getSkuCode,skuOutOfStockDto.getSkuCode()));
+
+            if(ttdeyeSku == null){
+                return ApiResponseT.failed("第"+line+"行,SKU代码"+skuOutOfStockDto.getSkuCode()+"的SKU不存在,请修改后重新上传！");
+            }
+
+            //SPU校验完成，保存上传文件记录
+            String fileUrl = iTtdeyeFileLogService.saveFile(multipartFile,4,ttdeyeUser.getLoginAccount());
+
+            //查询SPU信息
+            TtdeyeSpu ttdeyeSpu = ttdeyeSpuMapper.selectOne(Wrappers.<TtdeyeSpu>lambdaQuery()
+                    .eq(TtdeyeSpu::getDeleteFlag,0)
+                    .eq(TtdeyeSpu::getSpuId,ttdeyeSku.getSpuId())
+            );
+
+            skuOutOfStock(ttdeyeUser, skuOutOfStockDto, ttdeyeSku, fileUrl, ttdeyeSpu);
+
+
+        }
+
+        return ApiResponseT.ok();
+
+    }
+
+
+    /**
+     * 抽离的单比出库方法
+     * @param ttdeyeUser
+     * @param skuOutOfStockDto
+     * @param ttdeyeSku
+     * @param fileUrl
+     * @param ttdeyeSpu
+     */
+    private void skuOutOfStock(TtdeyeUser ttdeyeUser, SkuOutOfStockDto skuOutOfStockDto, TtdeyeSku ttdeyeSku, String fileUrl, TtdeyeSpu ttdeyeSpu) {
+        //更新SKU出库
+        TtdeyeSku ttdeyeSkuNew = new TtdeyeSku();
+        ttdeyeSkuNew.setStockCurrentNum(ttdeyeSku.getStockCurrentNum() - skuOutOfStockDto.getStockNum());
+        ttdeyeSkuNew.setStockOutNum(ttdeyeSku.getStockOutNum() + skuOutOfStockDto.getStockNum());
+        ttdeyeSkuNew.setUpdateTime(new Date());
+        ttdeyeSkuNew.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
+        ttdeyeSkuNew.setSkuId(ttdeyeSku.getSkuId());
+        ttdeyeSkuMapper.updateById(ttdeyeSkuNew);
+
+        //判断是否批次商品
+        if(ttdeyeSpu.getBatchFlag() == 0){
+            //非批次商品直接走SKU出库
+            TtdeyeStockChangeRecord ttdeyeStockChangeRecord =  new TtdeyeStockChangeRecord();
+            ttdeyeStockChangeRecord.setSkuId(ttdeyeSku.getSkuId());
+            ttdeyeStockChangeRecord.setSkuNo(ttdeyeSku.getSkuNo());
+            ttdeyeStockChangeRecord.setSkuBeforeStock(ttdeyeSku.getStockCurrentNum());
+            ttdeyeStockChangeRecord.setSkuAfterStock(ttdeyeSku.getStockCurrentNum() - skuOutOfStockDto.getStockNum());
+            ttdeyeStockChangeRecord.setOccurStock(skuOutOfStockDto.getStockNum());
+            ttdeyeStockChangeRecord.setDirection(0);
+            ttdeyeStockChangeRecord.setSourceType(3);
+            ttdeyeStockChangeRecord.setFileUrl(fileUrl);
+            ttdeyeStockChangeRecord.setCreateTime(new Date());
+            ttdeyeStockChangeRecord.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
+            ttdeyeStockChangeRecord.setCreateNikeName(ttdeyeUser.getNickName());
+            ttdeyeStockChangeRecord.setSpuId(ttdeyeSpu.getSpuId());
+            ttdeyeStockChangeRecord.setSpuNo(ttdeyeSpu.getSpuNo());
+            ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
+
+        }else if(ttdeyeSpu.getBatchFlag() == 1){
+            //进行批次出库
+            //todo 查询sku批次库存列表,以批次号正序排序
+
+            List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(
+                Wrappers.<TtdeyeSkuBatch>lambdaQuery()
+                        .eq(TtdeyeSkuBatch::getSkuId, ttdeyeSku.getSkuId())
+                        .le(TtdeyeSkuBatch::getStockCurrentNum,0)
+                        .orderByDesc(TtdeyeSkuBatch::getBatchNo)
+            );
+
+             //出库剩余数量
+             Long outSumBalance = skuOutOfStockDto.getStockNum();
+            //批次出库
+            for (TtdeyeSkuBatch ttdeyeSkuBatch : ttdeyeSkuBatchList) {
+
+                TtdeyeSkuBatch ttdeyeSkuBatchNew = new TtdeyeSkuBatch();
+                if(ttdeyeSkuBatch.getStockCurrentNum() >= outSumBalance){
+                    //如果大于等于出库数量，就把库出完
+                    ttdeyeSkuBatchNew.setStockCurrentNum(ttdeyeSkuBatch.getStockCurrentNum() - outSumBalance);
+                    ttdeyeSkuBatchNew.setStockOutNum(ttdeyeSkuBatch.getStockOutNum() + outSumBalance);
+                    ttdeyeSkuBatchNew.setUpdateTime(new Date());
+                    ttdeyeSkuBatchNew.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
+                    ttdeyeSkuBatchMapper.updateById(ttdeyeSkuBatchNew);
+                    //保存日志
+                    TtdeyeStockChangeRecord ttdeyeStockChangeRecord =  new TtdeyeStockChangeRecord();
+                    ttdeyeStockChangeRecord.setSkuId(ttdeyeSku.getSkuId());
+                    ttdeyeStockChangeRecord.setSkuNo(ttdeyeSku.getSkuNo());
+                    ttdeyeStockChangeRecord.setSkuBeforeStock(ttdeyeSku.getStockCurrentNum());
+                    ttdeyeStockChangeRecord.setSkuAfterStock(ttdeyeSku.getStockCurrentNum() - outSumBalance);
+                    ttdeyeStockChangeRecord.setOccurStock(outSumBalance);
+                    ttdeyeStockChangeRecord.setDirection(0);
+                    ttdeyeStockChangeRecord.setSourceType(3);
+                    ttdeyeStockChangeRecord.setFileUrl(fileUrl);
+                    ttdeyeStockChangeRecord.setCreateTime(new Date());
+                    ttdeyeStockChangeRecord.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
+                    ttdeyeStockChangeRecord.setCreateNikeName(ttdeyeUser.getNickName());
+                    ttdeyeStockChangeRecord.setSpuId(ttdeyeSpu.getSpuId());
+                    ttdeyeStockChangeRecord.setSpuNo(ttdeyeSpu.getSpuNo());
+
+                    //保存批次入库记录
+                    ttdeyeStockChangeRecord.setBatchFlag(1);
+                    ttdeyeStockChangeRecord.setBatchId(ttdeyeSkuBatch.getBatchId());
+                    ttdeyeStockChangeRecord.setBatchNo(ttdeyeSkuBatch.getBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchNo(ttdeyeSkuBatch.getSkuBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
+                    ttdeyeStockChangeRecord.setSkuBatchBeforeStock(ttdeyeSkuBatch.getStockCurrentNum());
+                    ttdeyeStockChangeRecord.setSkuBatchAfterStock(ttdeyeSkuBatch.getStockCurrentNum() - outSumBalance);
+                    ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
+                    break;
+                }else{
+                    //如果小于出库数量，就把自己出完
+                    ttdeyeSkuBatchNew.setStockCurrentNum(0L);
+                    ttdeyeSkuBatchNew.setStockOutNum(ttdeyeSkuBatch.getStockOutNum() + outSumBalance);
+                    ttdeyeSkuBatchNew.setUpdateTime(new Date());
+                    ttdeyeSkuBatchNew.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
+                    ttdeyeSkuBatchMapper.updateById(ttdeyeSkuBatchNew);
+
+                    //保存日志
+                    TtdeyeStockChangeRecord ttdeyeStockChangeRecord =  new TtdeyeStockChangeRecord();
+                    ttdeyeStockChangeRecord.setSkuId(ttdeyeSku.getSkuId());
+                    ttdeyeStockChangeRecord.setSkuNo(ttdeyeSku.getSkuNo());
+                    ttdeyeStockChangeRecord.setSkuBeforeStock(ttdeyeSku.getStockCurrentNum());
+                    ttdeyeStockChangeRecord.setSkuAfterStock(ttdeyeSku.getStockCurrentNum() - ttdeyeSkuBatch.getStockCurrentNum());
+                    ttdeyeStockChangeRecord.setOccurStock(outSumBalance);
+                    ttdeyeStockChangeRecord.setDirection(0);
+                    ttdeyeStockChangeRecord.setSourceType(3);
+                    ttdeyeStockChangeRecord.setFileUrl(fileUrl);
+                    ttdeyeStockChangeRecord.setCreateTime(new Date());
+                    ttdeyeStockChangeRecord.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
+                    ttdeyeStockChangeRecord.setCreateNikeName(ttdeyeUser.getNickName());
+                    ttdeyeStockChangeRecord.setSpuId(ttdeyeSpu.getSpuId());
+                    ttdeyeStockChangeRecord.setSpuNo(ttdeyeSpu.getSpuNo());
+
+                    //保存批次入库记录
+                    ttdeyeStockChangeRecord.setBatchFlag(1);
+                    ttdeyeStockChangeRecord.setBatchId(ttdeyeSkuBatch.getBatchId());
+                    ttdeyeStockChangeRecord.setBatchNo(ttdeyeSkuBatch.getBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchNo(ttdeyeSkuBatch.getSkuBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
+                    ttdeyeStockChangeRecord.setSkuBatchBeforeStock(ttdeyeSkuBatch.getStockCurrentNum());
+                    ttdeyeStockChangeRecord.setSkuBatchAfterStock(0L);
+                    ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
+                    outSumBalance = outSumBalance - ttdeyeSkuBatch.getStockCurrentNum();
+                    //如果出库后剩余需出库金额正好小于等于0就结束
+                    if(outSumBalance <= 0){
+                        break;
+                    }
+                }
+            }
+        }
     }
 
 }

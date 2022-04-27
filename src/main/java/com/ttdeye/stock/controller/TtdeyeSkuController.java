@@ -5,7 +5,10 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
+import com.ttdeye.stock.domain.dto.poi.SkuWarehousingDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
+import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
+import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
 import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.service.ITtdeyeSkuService;
@@ -121,7 +124,22 @@ public class TtdeyeSkuController extends BaseController {
 
 
     /**
-     * 采购入库
+     * 手动入库
+     * @return
+     */
+    @RequestMapping(value = "skuOperaWarehousing")
+    public ApiResponseT skuOperaWarehousing(@RequestBody SkuWarehousingReq skuWarehousingReq){
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        iTtdeyeSkuService.skuOperaWarehousing(skuWarehousingReq,ttdeyeUser);
+        return ApiResponseT.ok();
+    }
+
+
+
+
+
+    /**
+     * 导入模版进行采购入库
      * @param multipartFile
      * @return
      * @throws Exception
@@ -135,6 +153,33 @@ public class TtdeyeSkuController extends BaseController {
 
 
 
+    /**
+     * 手动出
+     * @return
+     */
+    @RequestMapping(value = "skuOperaWarehousing")
+    public ApiResponseT skuOperaOutOfStock(@RequestBody SkuOutOfStockReq skuOutOfStockReq){
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        iTtdeyeSkuService.skuOperaOutOfStock(skuOutOfStockReq,ttdeyeUser);
+        return ApiResponseT.ok();
+    }
+
+
+
+
+    /**
+     * 导入模版批量出库
+     * @param multipartFile
+     * @return
+     */
+    @PostMapping(value = "skuOutOfStock")
+    public ApiResponseT skuOutOfStock(@RequestParam("file") MultipartFile multipartFile) throws Exception {
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+
+        ApiResponseT apiResponseT = iTtdeyeSkuService.skuOutOfStock(multipartFile,ttdeyeUser);
+
+        return ApiResponseT.ok();
+    }
 
 
 

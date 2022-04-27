@@ -3,6 +3,8 @@ package com.ttdeye.stock.service;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
+import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
+import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
 import com.ttdeye.stock.entity.TtdeyeSku;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ttdeye.stock.entity.TtdeyeUser;
@@ -28,4 +30,10 @@ public interface ITtdeyeSkuService extends IService<TtdeyeSku> {
     List<SkuExportDto> selectExportData(SkuExportReq skuExportReq);
 
     ApiResponseT skuWarehousing(MultipartFile multipartFile, TtdeyeUser ttdeyeUser) throws Exception;
+
+    ApiResponseT skuOutOfStock(MultipartFile multipartFile, TtdeyeUser ttdeyeUser) throws Exception;
+
+    void skuOperaWarehousing(SkuWarehousingReq skuWarehousingReq, TtdeyeUser ttdeyeUser);
+
+    void skuOperaOutOfStock(SkuOutOfStockReq skuOutOfStockReq, TtdeyeUser ttdeyeUser);
 }
