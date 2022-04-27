@@ -39,7 +39,7 @@ RUN addgroup -g ${APP_GID} ${APP_GROUP} \
 
 #### 基础目录
 # 项目信息
-ENV Projects="xcauto"
+ENV Projects="ttdeye-stock"
 ENV Dir_Projects="/data/service/${Projects}"
 ENV Dir_Projects_Data="${Dir_Projects}/Data"
 ENV Dir_Projects_App="${Dir_Projects}/execs/${APP_NAME}"

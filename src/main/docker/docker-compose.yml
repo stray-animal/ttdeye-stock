@@ -14,7 +14,7 @@ services:
     ports:
       - 80:80
       - 443:443
-    container_name: buding-nginx
+    container_name: ttdeye-nginx
     volumes:
       - ~/nginx/www:/usr/share/nginx/html
       - ~/conf/nginx.conf:/etc/nginx/nginx.conf
@@ -26,7 +26,7 @@ services:
     image: redis
     ports:
       - 6379:6379
-    container_name: buding-redis
+    container_name: ttdeye-redis
     volumes:
       - /data/redis/data:/data
     command:
@@ -34,7 +34,7 @@ services:
         "--character-set-server=utf8mb4",
         "redis-server",
         "--appendonly yes",
-        "--requirepass budinglingyang"
+        "--requirepass ttdeye"
       ]
     restart: always
 
@@ -42,7 +42,7 @@ services:
     image: mysql:5.7
     ports:
       - 3306:3306
-    container_name: buding-mysql
+    container_name: ttdeye-mysql
     volumes:
       - /data/mysql/conf:/etc/mysql/conf.d
       - /data/mysql/logs:/logs
@@ -50,6 +50,6 @@ services:
     command:
       [
         "-e",
-        "MYSQL_ROOT_PASSWORD=budinglingyang"
+        "MYSQL_ROOT_PASSWORD=ttdeye"
       ]
     restart: always
