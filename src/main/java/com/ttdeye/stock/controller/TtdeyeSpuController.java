@@ -61,11 +61,9 @@ public class TtdeyeSpuController extends BaseController {
      * @return
      */
     @PostMapping(value = "edit")
-    public ApiResponseT editUser(@RequestBody TtdeyeSpu iTtdeyeSpu){
-        TtdeyeUser ttdeyeUser = getTtdeyeUser();
-        iTtdeyeSpu.setUpdateTime(new Date());
-        iTtdeyeSpu.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
-        iTtdeyeSpuService.updateById(iTtdeyeSpu);
+    public ApiResponseT editSpu(@RequestBody TtdeyeSpu iTtdeyeSpu){
+
+        iTtdeyeSpuService.editSpu(iTtdeyeSpu);
         return ApiResponseT.ok();
     }
 

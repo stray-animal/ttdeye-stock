@@ -30,4 +30,6 @@ public interface ITtdeyeSpuService extends IService<TtdeyeSpu> {
      * @return
      */
     Page<GoodsInfoDto> selectGoodsInfoDtoListPage(Page page, GoodsListReq goodsListReq);
+
+    Integer editSpu(TtdeyeSpu iTtdeyeSpu);
 }

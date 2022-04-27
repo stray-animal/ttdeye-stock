@@ -4,7 +4,9 @@ import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ttdeye.stock.common.domain.ApiResponseCode;
 import com.ttdeye.stock.common.domain.ApiResponseT;
+import com.ttdeye.stock.common.exception.ApiException;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
 import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
@@ -146,4 +148,27 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
         goodsInfoDtoPage.setRecords(goodsInfoDtos);
         return goodsInfoDtoPage;
     }
+
+
+    /**
+     * 修改SPU
+     * @param iTtdeyeSpu
+     * @return
+     */
+    public Integer editSpu(TtdeyeSpu iTtdeyeSpu){
+
+        //查询旧的SPU信息
+        TtdeyeSpu ttdeyeSpuOld = ttdeyeSpuMapper.selectById(iTtdeyeSpu.getSpuId());
+        if(ttdeyeSpuOld.getBatchFlag() != iTtdeyeSpu.getBatchFlag()){
+            //查询是否存在SKU
+          Long count = ttdeyeSkuMapper.selectCount(Wrappers.<TtdeyeSku>lambdaQuery().eq(TtdeyeSku::getSpuId,iTtdeyeSpu.getSpuId()));
+          if(count > 0){
+              throw  new ApiException(ApiResponseCode.COMMON_FAILED_CODE,"SPU下已经存在SKU，不允许修改批次支持类型！");
+          }
+        }
+        return ttdeyeSpuMapper.updateById(iTtdeyeSpu);
+
+    }
+
+
 }
