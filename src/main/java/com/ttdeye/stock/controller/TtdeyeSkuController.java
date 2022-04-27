@@ -121,10 +121,29 @@ public class TtdeyeSkuController extends BaseController {
 
 
     /**
+     * 采购入库
+     * @param multipartFile
+     * @return
+     * @throws Exception
+     */
+    @PostMapping(value = "/skuWarehousing")
+    public ApiResponseT skuWarehousing(@RequestParam("file") MultipartFile multipartFile) throws Exception {
+        TtdeyeUser ttdeyeUser = getTtdeyeUser();
+        ApiResponseT apiResponseT = iTtdeyeSkuService.skuWarehousing(multipartFile,ttdeyeUser);
+        return apiResponseT;
+    }
+
+
+
+
+
+
+
+
+    /**
      * SKU导出
      * @param skuExportReq
      */
-
     @PostMapping(value = "/exportSku")
     public void exportSku(SkuExportReq skuExportReq) throws IOException {
         List<SkuExportDto> skuExportDtoList = iTtdeyeSkuService.selectExportData(skuExportReq);

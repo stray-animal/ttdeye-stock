@@ -26,4 +26,6 @@ public interface ITtdeyeSkuService extends IService<TtdeyeSku> {
 
 
     List<SkuExportDto> selectExportData(SkuExportReq skuExportReq);
+
+    ApiResponseT skuWarehousing(MultipartFile multipartFile, TtdeyeUser ttdeyeUser) throws Exception;
 }
