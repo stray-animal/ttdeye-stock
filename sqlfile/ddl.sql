@@ -5,7 +5,7 @@ create schema `ttdeye-stock` collate utf8_general_ci;
 create user 'ttdeye'@'%' identified by 'ttdeye¥5%4fsd';
 
 
-grant alter, alter routine, create, create routine, create temporary tables, create view, delete, drop, event, execute, index, insert, lock tables, references, select, show view, trigger, update on `ttdeye-stock`.* to psi;
+grant alter, alter routine, create, create routine, create temporary tables, create view, delete, drop, event, execute, index, insert, lock tables, references, select, show view, trigger, update on `ttdeye-stock`.* to ttdeye;
 
 
 create table `ttdeye-stock`.ttdeye_batch
