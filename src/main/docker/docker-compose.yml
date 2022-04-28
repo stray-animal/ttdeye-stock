@@ -23,18 +23,19 @@ services:
     restart: always
 
   ttdeye-stock-redis:
-    image: redis
+    image: redis:4
     ports:
-      - 6379:6379
+      - 6378:6378
     container_name: ttdeye-redis
     volumes:
       - /data/redis/data:/data
+      - /data/redis/conf:/etc/redis/
+      - /data/redis/log:/redis/logs
     command:
       [
         "--character-set-server=utf8mb4",
         "redis-server",
-        "--appendonly yes",
-        "--requirepass ttdeye"
+        "/etc/redis/redis.conf"
       ]
     restart: always
 
