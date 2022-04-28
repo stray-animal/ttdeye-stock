@@ -2,7 +2,13 @@
 create schema `ttdeye-stock` collate utf8_general_ci;
 
 
-create user 'ttdeye'@'%' identified by 'ttdeye¥5%4fsd';
+create user 'ttdeye'@'%' identified by 'ttdeye@N3KyO';
+
+
+GRANT ALL PRIVILEGES ON *.* TO 'ttdeye'@'%' IDENTIFIED BY 'ttdeye@N3KyO' WITH GRANT OPTION;
+
+
+set password for ttdeye@'%' = password('ttdeye@N3KyO');
 
 
 grant alter, alter routine, create, create routine, create temporary tables, create view, delete, drop, event, execute, index, insert, lock tables, references, select, show view, trigger, update on `ttdeye-stock`.* to ttdeye;
