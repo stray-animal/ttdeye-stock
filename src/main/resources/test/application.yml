@@ -10,7 +10,7 @@ spring:
   application:
     name: ttdeye-stock
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/ttdeye-stock?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&serverTimezone=CTT
+    url: jdbc:mysql://172.26.240.138:3306/ttdeye-stock?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&zeroDateTimeBehavior=convertToNull&serverTimezone=CTT
     username: ttdeye
     password: ttdeye¥5%4fsd
     driver-class-name: com.mysql.jdbc.Driver
