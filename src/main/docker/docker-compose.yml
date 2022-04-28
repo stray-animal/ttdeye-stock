@@ -30,10 +30,9 @@ services:
     volumes:
       - /data/redis/data:/data
       - /data/redis/conf:/etc/redis/
-      - /data/redis/log:/redis/logs
+#      - /data/redis/log:/redis/logs
     command:
       [
-        "--character-set-server=utf8mb4",
         "redis-server",
         "/etc/redis/redis.conf"
       ]
