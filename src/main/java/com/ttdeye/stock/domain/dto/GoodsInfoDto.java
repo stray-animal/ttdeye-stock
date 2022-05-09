@@ -14,7 +14,7 @@ import java.util.List;
  ***/
 
 @Data
-@AllArgsConstructor()
+@AllArgsConstructor
 @NoArgsConstructor
 public class GoodsInfoDto extends TtdeyeSpu {
 

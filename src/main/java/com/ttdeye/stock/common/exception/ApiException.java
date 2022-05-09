@@ -2,6 +2,7 @@ package com.ttdeye.stock.common.exception;
 
 import com.ttdeye.stock.common.domain.ApiResponseCode;
 import com.ttdeye.stock.common.domain.IApiResponseCode;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +11,7 @@ import lombok.Setter;
  *
  * @author clayzhang
  */
-@Getter
-@Setter
+@Data
 public class ApiException extends RuntimeException {
 
     private ApiResponseCode responseCode;

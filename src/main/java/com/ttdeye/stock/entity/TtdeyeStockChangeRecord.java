@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,8 +21,7 @@ import lombok.Setter;
  * @author 张永明
  * @since 2022-04-26
  */
-@Getter
-@Setter
+@Data
 @TableName("ttdeye_stock_change_record")
 public class TtdeyeStockChangeRecord implements Serializable {
 

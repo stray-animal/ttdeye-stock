@@ -3,6 +3,7 @@ package com.ttdeye.stock.common.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 import com.ttdeye.stock.common.utils.JacksonUtil;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,8 +17,7 @@ import java.util.*;
  *
  * @author clayzhang
  */
-@Getter
-@Setter
+@Data
 @ToString
 public class ApiResponse implements Serializable {
 

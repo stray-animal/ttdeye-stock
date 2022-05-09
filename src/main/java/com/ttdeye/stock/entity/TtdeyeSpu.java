@@ -7,6 +7,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,8 +21,7 @@ import lombok.Setter;
  * @author 张永明
  * @since 2022-04-26
  */
-@Getter
-@Setter
+@Data
 @TableName("ttdeye_spu")
 public class TtdeyeSpu implements Serializable {
 
@@ -59,6 +61,7 @@ public class TtdeyeSpu implements Serializable {
     /**
      * 电商平台：0-其他，1-shopfily
      */
+    @JsonProperty("eCommercePlatform")
     private Integer eCommercePlatform;
 
     /**
@@ -102,6 +105,8 @@ public class TtdeyeSpu implements Serializable {
      * SPU编号
      */
     private String spuNo;
+
+
 
 
 }
