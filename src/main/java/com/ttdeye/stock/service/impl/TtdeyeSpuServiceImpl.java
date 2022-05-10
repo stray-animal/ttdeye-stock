@@ -2,6 +2,7 @@ package com.ttdeye.stock.service.impl;
 
 import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.domain.ApiResponseCode;
@@ -123,7 +124,7 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
      */
     public Page<GoodsInfoDto> selectGoodsInfoDtoListPage(Page page, GoodsListReq goodsListReq){
         Page<TtdeyeSpu> ttdeyeSpuPage = ttdeyeSpuMapper.selectPage(page,Wrappers.<TtdeyeSpu>lambdaQuery()
-                .like(goodsListReq.getSpuCode() != null,TtdeyeSpu::getSpuCode,goodsListReq.getSpuCode())
+                .like(!StringUtils.isEmpty(goodsListReq.getSpuCode() ),TtdeyeSpu::getSpuCode,goodsListReq.getSpuCode())
                 .eq(goodsListReq.getECommercePlatform() != null,TtdeyeSpu::getECommercePlatform,goodsListReq.getECommercePlatform())
                 .ge(goodsListReq.getStartTime() != null,TtdeyeSpu::getCreateTime,goodsListReq.getStartTime())
                 .lt(goodsListReq.getEndTime() !=null,TtdeyeSpu::getCreateTime,goodsListReq.getEndTime())

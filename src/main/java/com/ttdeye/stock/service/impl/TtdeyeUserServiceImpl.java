@@ -10,6 +10,7 @@ import com.ttdeye.stock.mapper.TtdeyeUserMapper;
 import com.ttdeye.stock.service.ITtdeyeUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +34,8 @@ public class TtdeyeUserServiceImpl extends ServiceImpl<TtdeyeUserMapper, TtdeyeU
 //        page.addOrder(OrderItem.desc("create_time"));
         Page<TtdeyeUser> ttdeyeUserPage =  ttdeyeUserMapper.selectPage(page, Wrappers.<TtdeyeUser>lambdaQuery()
                         .eq(TtdeyeUser::getAdminFlag,0)
-                .eq(ttdeyeUser.getPhone() != null, TtdeyeUser::getPhone, ttdeyeUser.getPhone())
-                .like(ttdeyeUser.getNickName() != null, TtdeyeUser::getNickName, ttdeyeUser.getNickName())
+                .eq(!StringUtils.isEmpty(ttdeyeUser.getPhone()) , TtdeyeUser::getPhone, ttdeyeUser.getPhone())
+                .like(!StringUtils.isEmpty(ttdeyeUser.getNickName()), TtdeyeUser::getNickName, ttdeyeUser.getNickName())
                 .orderByDesc(TtdeyeUser::getCreateTime));
 
         log.info("总条数 -------------> {}", ttdeyeUserPage.getTotal());

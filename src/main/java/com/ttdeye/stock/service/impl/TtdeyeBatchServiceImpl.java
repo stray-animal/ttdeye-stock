@@ -1,5 +1,6 @@
 package com.ttdeye.stock.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.entity.TtdeyeBatch;
@@ -31,7 +32,8 @@ public class TtdeyeBatchServiceImpl extends ServiceImpl<TtdeyeBatchMapper, Ttdey
      * @return
      */
     public Page<TtdeyeBatch> selectListPage(Page page, TtdeyeBatch ttdeyeBatch){
-        Page<TtdeyeBatch> ttdeyeBatchPage =  ttdeyeBatchMapper.selectPage(page, Wrappers.<TtdeyeBatch>lambdaQuery().eq(ttdeyeBatch.getBatchNo() != null,TtdeyeBatch::getBatchNo,ttdeyeBatch.getBatchNo()));
+        Page<TtdeyeBatch> ttdeyeBatchPage =  ttdeyeBatchMapper.selectPage(page, Wrappers.<TtdeyeBatch>lambdaQuery()
+                .eq(!StringUtils.isEmpty(ttdeyeBatch.getBatchNo()),TtdeyeBatch::getBatchNo,ttdeyeBatch.getBatchNo()));
         return ttdeyeBatchPage;
     }
 }

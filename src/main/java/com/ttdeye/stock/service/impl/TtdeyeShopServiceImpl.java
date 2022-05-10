@@ -1,5 +1,6 @@
 package com.ttdeye.stock.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,8 +26,8 @@ public class TtdeyeShopServiceImpl extends ServiceImpl<TtdeyeShopMapper, TtdeyeS
     public Page<TtdeyeShop> selectUserPage(Page page, TtdeyeShop ttdeyeShop){
 
         Page<TtdeyeShop> ttdeyeShopPage =   ttdeyeShopMapper.selectPage(page, Wrappers.<TtdeyeShop>lambdaQuery()
-                .like(ttdeyeShop.getShopName() != null,TtdeyeShop::getShopName,ttdeyeShop.getShopName())
-                        .like(ttdeyeShop.getPlatform() != null,TtdeyeShop::getPlatform,ttdeyeShop.getPlatform())
+                .like(!StringUtils.isEmpty(ttdeyeShop.getShopName() ),TtdeyeShop::getShopName,ttdeyeShop.getShopName())
+                        .like(!StringUtils.isEmpty(ttdeyeShop.getPlatform() ),TtdeyeShop::getPlatform,ttdeyeShop.getPlatform())
                 );
 
         return ttdeyeShopPage;
