@@ -129,6 +129,7 @@ public class TtdeyeSpuServiceImpl extends ServiceImpl<TtdeyeSpuMapper, TtdeyeSpu
                 .ge(goodsListReq.getStartTime() != null,TtdeyeSpu::getCreateTime,goodsListReq.getStartTime())
                 .lt(goodsListReq.getEndTime() !=null,TtdeyeSpu::getCreateTime,goodsListReq.getEndTime())
                 .eq(TtdeyeSpu::getDeleteFlag,0)
+                .orderByDesc(TtdeyeSpu::getCreateTime)
         );
         Page<GoodsInfoDto> goodsInfoDtoPage = new Page<>();
         BeanUtils.copyProperties(ttdeyeSpuPage,goodsInfoDtoPage);

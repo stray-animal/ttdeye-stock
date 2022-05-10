@@ -102,7 +102,7 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             Integer line = i+1;
             SkuImportDto skuImportDto = skuImportDtoList.get(i);
 
-            if(StringUtils.isEmpty(skuImportDto.getSpuCode()) && StringUtils.isEmpty(skuImportDto.getSpuNo())){
+            if(StringUtils.isEmpty(skuImportDto.getSpuCode()) || StringUtils.isEmpty(skuImportDto.getSpuNo())){
                 return ApiResponseT.failed("第"+line+"行,SPU代码或编号至少一项必填！");
             }
             //SKU代码是否重复
