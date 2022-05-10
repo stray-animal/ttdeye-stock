@@ -42,6 +42,12 @@ public class ApiResponseT<T> implements Serializable {
         this.data = data;
     }
 
+    public ApiResponseT(ApiResponseCode apiResponseCode) {
+        this.code = apiResponseCode.getCode();
+        this.data = (T) apiResponseCode.getMessage();
+    }
+
+
     public ApiResponseT(Integer status, String message, T data) {
         this.code = status;
         this.message = message;

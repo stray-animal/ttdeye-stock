@@ -8,6 +8,7 @@ import com.ttdeye.stock.common.domain.GlobalBusinessConstant;
 import com.ttdeye.stock.common.utils.JwtUtils;
 import com.ttdeye.stock.common.utils.PasswordUtil;
 import com.ttdeye.stock.common.utils.RedisTemplateUtil;
+import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
 import com.ttdeye.stock.domain.dto.UserLoginDto;
 import com.ttdeye.stock.domain.dto.poi.TtdeyeUserDto;
 import com.ttdeye.stock.entity.TtdeyeUser;
@@ -87,13 +88,15 @@ public class TtdeyeUserController extends BaseController {
     public ApiResponseT saveUser(@RequestBody TtdeyeUser ttdeyeUser){
         TtdeyeUser ttdeyeUserAdmin = getTtdeyeUser();
 
-        if(ttdeyeUserAdmin == null && ttdeyeUserAdmin.getAdminFlag() != 1){
+        if(ttdeyeUserAdmin == null || ttdeyeUserAdmin.getAdminFlag() != 1){
             return ApiResponseT.failed("非管理员禁止操作！");
         }
         String userpassword = PasswordUtil.encrypt(ttdeyeUser.getLoginAccount(), ttdeyeUser.getLoginPassword(), SALT);
         ttdeyeUser.setLoginPassword(userpassword);
         ttdeyeUser.setUpdateTime(new Date());
         ttdeyeUser.setUpdateUserAccount(ttdeyeUserAdmin.getUpdateUserAccount());
+        ttdeyeUser.setAdminFlag(0);
+        ttdeyeUser.setUserCode(SnowflakeIdWorker.generateIdStr());
         ttdeyeUserService.save(ttdeyeUser);
         return ApiResponseT.ok();
 
