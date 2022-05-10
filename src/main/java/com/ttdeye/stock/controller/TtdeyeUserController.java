@@ -1,6 +1,7 @@
 package com.ttdeye.stock.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
@@ -91,6 +92,13 @@ public class TtdeyeUserController extends BaseController {
         if(ttdeyeUserAdmin == null || ttdeyeUserAdmin.getAdminFlag() != 1){
             return ApiResponseT.failed("非管理员禁止操作！");
         }
+
+        TtdeyeUser ttdeyeUserOld = ttdeyeUserService.getOne(Wrappers.<TtdeyeUser>lambdaQuery().eq(TtdeyeUser::getLoginAccount,ttdeyeUser.getLoginAccount())
+                .eq(TtdeyeUser::getDeleteFlag,0));
+        if(ttdeyeUserOld != null){
+            return ApiResponseT.failed("登陆用户名不允许重复！");
+        }
+
         String userpassword = PasswordUtil.encrypt(ttdeyeUser.getLoginAccount(), ttdeyeUser.getLoginPassword(), SALT);
         ttdeyeUser.setLoginPassword(userpassword);
         ttdeyeUser.setUpdateTime(new Date());
