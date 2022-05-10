@@ -16,6 +16,7 @@ import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.mapper.TtdeyeUserMapper;
 import com.ttdeye.stock.service.ITtdeyeUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -123,8 +124,10 @@ public class TtdeyeUserController extends BaseController {
         if(ttdeyeUserAdmin == null && ttdeyeUserAdmin.getAdminFlag() != 1){
             return ApiResponseT.failed("非管理员禁止操作！");
         }
-        String userpassword = PasswordUtil.encrypt(ttdeyeUser.getLoginAccount(), ttdeyeUser.getLoginPassword(), SALT);
-        ttdeyeUser.setLoginPassword(userpassword);
+        if(!StringUtils.isEmpty(ttdeyeUser.getLoginAccount())) {
+            String userpassword = PasswordUtil.encrypt(ttdeyeUser.getLoginAccount(), ttdeyeUser.getLoginPassword(), SALT);
+            ttdeyeUser.setLoginPassword(userpassword);
+        }
         ttdeyeUser.setUpdateTime(new Date());
         ttdeyeUser.setUpdateUserAccount(ttdeyeUserAdmin.getUpdateUserAccount());
         ttdeyeUserService.updateById(ttdeyeUser);
