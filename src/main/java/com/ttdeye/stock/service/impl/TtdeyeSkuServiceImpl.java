@@ -102,8 +102,8 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             Integer line = i+1;
             SkuImportDto skuImportDto = skuImportDtoList.get(i);
 
-            if(StringUtils.isEmpty(skuImportDto.getSpuCode()) || StringUtils.isEmpty(skuImportDto.getSpuNo())){
-                return ApiResponseT.failed("第"+line+"行,SPU代码或编号至少一项必填！");
+            if(StringUtils.isEmpty(skuImportDto.getSpuCode()) && StringUtils.isEmpty(skuImportDto.getSpuNo())){
+                return ApiResponseT.failed("第"+line+"行,SPU代码或SPU编号至少一项必填！");
             }
             //SKU代码是否重复
             Long count = ttdeyeSkuMapper.selectCount(Wrappers.<TtdeyeSku>lambdaQuery()
@@ -121,9 +121,23 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             if(ttdeyeSpu == null){
                 return ApiResponseT.failed("第"+line+"行,未查询到有效SPU,请查证！");
             }
-            if(ttdeyeSpu.getBatchFlag() == 1 && StringUtils.isEmpty(skuImportDto.getBatchNo())){
-                return ApiResponseT.failed("第"+line+"行,批次商品，必须填写批次号！");
+            if(ttdeyeSpu.getBatchFlag() == 1){
+                if(StringUtils.isEmpty(skuImportDto.getBatchNo())){
+                    return ApiResponseT.failed("第"+line+"行,批次商品，必须填写批次号！");
+                }else{
+                    TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                            Wrappers.<TtdeyeBatch>lambdaQuery()
+                                    .eq(TtdeyeBatch::getDeleteFlag,0)
+                                    .eq(TtdeyeBatch::getBatchNo,skuImportDto.getBatchNo())
+                    );
+                    if(ttdeyeBatch == null){
+                        return ApiResponseT.failed("第"+line+"行,批次商品，初始批次号不可用，请修改！");
+                    }
+                }
+
             }
+
+
 
             //SPU校验完成，保存上传文件记录
             String fileUrl = iTtdeyeFileLogService.saveFile(multipartFile,2,ttdeyeUser.getLoginAccount());
@@ -291,8 +305,21 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             if(ttdeyeSpu == null){
                 return ApiResponseT.failed("第"+line+"行,未查询到有效SPU,请查证！");
             }
-            if(ttdeyeSpu.getBatchFlag() == 1 && StringUtils.isEmpty(skuWarehousingDto.getBatchNo())){
-                return ApiResponseT.failed("第"+line+"行,批次商品，入库必须填写批次号！");
+
+            if(ttdeyeSpu.getBatchFlag() == 1){
+                if(StringUtils.isEmpty(skuWarehousingDto.getBatchNo())){
+                    return ApiResponseT.failed("第"+line+"行,批次商品，必须填写批次号！");
+                }else{
+                    TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                            Wrappers.<TtdeyeBatch>lambdaQuery()
+                                    .eq(TtdeyeBatch::getDeleteFlag,0)
+                                    .eq(TtdeyeBatch::getBatchNo,skuWarehousingDto.getBatchNo())
+                    );
+                    if(ttdeyeBatch == null){
+                        return ApiResponseT.failed("第"+line+"行,批次商品，初始批次号不可用，请修改！");
+                    }
+                }
+
             }
 
             if(skuWarehousingDto.getStockNum() <=0 ){
