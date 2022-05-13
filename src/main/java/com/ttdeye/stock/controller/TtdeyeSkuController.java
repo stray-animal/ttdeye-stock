@@ -2,6 +2,7 @@ package com.ttdeye.stock.controller;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
@@ -49,6 +50,8 @@ public class TtdeyeSkuController extends BaseController {
     private HttpServletResponse response;
 
 
+
+
     /**
      * 新增SKU
      * @param iTtdeyeSku
@@ -56,11 +59,21 @@ public class TtdeyeSkuController extends BaseController {
      */
     @PostMapping(value = "add")
     public ApiResponseT saveUser(@RequestBody TtdeyeSku iTtdeyeSku){
+
+        Long count =  iTtdeyeSkuService.count(Wrappers.<TtdeyeSku>lambdaQuery()
+                .eq(TtdeyeSku::getDeleteFlag,0)
+                .eq(TtdeyeSku::getSkuCode,iTtdeyeSku.getSkuCode()));
+        //SKU代码是否重复
+        if(count > 0){
+            return ApiResponseT.failed("SKU代码库中已经存在，请改正后重新提交！");
+        }
+
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSku.setCreateTime(new Date());
         iTtdeyeSku.setUpdateTime(new Date());
         iTtdeyeSku.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
         iTtdeyeSku.setSourceType(1);
+        iTtdeyeSku.setState(1);
         iTtdeyeSkuService.save(iTtdeyeSku);
         return ApiResponseT.ok();
     }
@@ -73,6 +86,17 @@ public class TtdeyeSkuController extends BaseController {
      */
     @PostMapping(value = "edit")
     public ApiResponseT editUser(@RequestBody TtdeyeSku iTtdeyeSku){
+
+        Long count =  iTtdeyeSkuService.count(Wrappers.<TtdeyeSku>lambdaQuery()
+                .eq(TtdeyeSku::getDeleteFlag,0)
+                .eq(TtdeyeSku::getSkuCode,iTtdeyeSku.getSkuCode())
+                .ne(TtdeyeSku::getSkuId,iTtdeyeSku.getSkuId())
+            );
+        //SKU代码是否重复
+        if(count > 0){
+            return ApiResponseT.failed("SKU代码库中已经存在，请改正后重新提交！");
+        }
+
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSku.setUpdateTime(new Date());
         iTtdeyeSku.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
@@ -91,8 +115,6 @@ public class TtdeyeSkuController extends BaseController {
         TtdeyeSku ttdeyeBatch = iTtdeyeSkuService.getById(skuId);
         return ApiResponseT.ok(ttdeyeBatch);
     }
-
-
 
 
 
@@ -137,8 +159,6 @@ public class TtdeyeSkuController extends BaseController {
         iTtdeyeSkuService.skuOperaWarehousing(skuWarehousingReq,ttdeyeUser);
         return ApiResponseT.ok();
     }
-
-
 
 
 
@@ -209,6 +229,10 @@ public class TtdeyeSkuController extends BaseController {
             throw new IOException(e.getMessage());
         }
     }
+
+
+
+
 
 
 
