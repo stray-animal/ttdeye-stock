@@ -33,6 +33,7 @@ public class BaseController {
             String xAuthToken = request.getHeader("X-Auth-Token");
             Object userObject = redisTemplateUtils.get(xAuthToken);
             String userAsString = JacksonUtil.toJsonString(userObject);
+            log.info("当前登陆用户信息---：{}",userAsString);
             TtdeyeUser ttdeyeUser = JacksonUtil.readValue(userAsString, TtdeyeUser.class);
             if(ttdeyeUser == null || StringUtils.isEmpty(ttdeyeUser.getLoginAccount())){
                 //表示登陆失效
