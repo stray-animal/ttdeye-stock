@@ -5,6 +5,7 @@ import cn.afterturn.easypoi.excel.entity.ExportParams;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
+import com.ttdeye.stock.domain.dto.TtdeyeSkuBatchDto;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
 import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
@@ -14,6 +15,7 @@ import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeSkuBatch;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.mapper.TtdeyeSkuBatchMapper;
+import com.ttdeye.stock.service.ITtdeyeSkuBatchService;
 import com.ttdeye.stock.service.ITtdeyeSkuService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -52,10 +54,9 @@ public class TtdeyeSkuController extends BaseController {
     @Autowired
     private HttpServletResponse response;
 
+
     @Autowired
-    private TtdeyeSkuBatchMapper ttdeyeSkuBatchMapper;
-
-
+    private ITtdeyeSkuBatchService iTtdeyeSkuBatchService;
 
 
     /**
@@ -258,11 +259,8 @@ public class TtdeyeSkuController extends BaseController {
      * @return
      */
     @GetMapping(value = "skuStockDetail")
-    public ApiResponseT<List<TtdeyeSkuBatch>> skuStockDetail(Long skuId){
-        List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(Wrappers.<TtdeyeSkuBatch>lambdaQuery()
-                .eq(TtdeyeSkuBatch::getSkuId,skuId)
-            );
-        return ApiResponseT.ok(ttdeyeSkuBatchList);
+    public ApiResponseT<List<TtdeyeSkuBatchDto>> skuStockDetail(Long skuId){
+        return ApiResponseT.ok(iTtdeyeSkuBatchService.selectTtdeyeSkuBatchDtoBySkuId(skuId));
     }
 
 

@@ -1,7 +1,12 @@
 package com.ttdeye.stock.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ttdeye.stock.domain.dto.TtdeyeStockChangeRecordDto;
+import com.ttdeye.stock.domain.dto.req.TtdeyeStockChangeRecordReq;
 import com.ttdeye.stock.entity.TtdeyeStockChangeRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +18,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ITtdeyeStockChangeRecordService extends IService<TtdeyeStockChangeRecord> {
 
+    Page<TtdeyeStockChangeRecordDto> selectStockChangeRecord(TtdeyeStockChangeRecordReq ttdeyeStockChangeRecordReq, Page page);
 }

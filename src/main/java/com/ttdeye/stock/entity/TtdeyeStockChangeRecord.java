@@ -84,7 +84,7 @@ public class TtdeyeStockChangeRecord implements Serializable {
     private Integer direction;
 
     /**
-     * 是否批次出库：1-是，0-否
+     * 是否批次出入库：1-是，0-否
      */
     private Integer batchFlag;
 

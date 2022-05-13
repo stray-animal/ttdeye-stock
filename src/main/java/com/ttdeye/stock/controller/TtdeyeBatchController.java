@@ -4,11 +4,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
+import com.ttdeye.stock.domain.dto.TtdeyeSkuBatchDto;
 import com.ttdeye.stock.entity.TtdeyeBatch;
 import com.ttdeye.stock.entity.TtdeyeSkuBatch;
 import com.ttdeye.stock.entity.TtdeyeUser;
 import com.ttdeye.stock.mapper.TtdeyeSkuBatchMapper;
 import com.ttdeye.stock.service.ITtdeyeBatchService;
+import com.ttdeye.stock.service.ITtdeyeSkuBatchService;
+import com.ttdeye.stock.service.ITtdeyeSkuService;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +34,7 @@ public class TtdeyeBatchController extends BaseController {
 
 
     @Autowired
-    private TtdeyeSkuBatchMapper ttdeyeSkuBatchMapper;
+    private ITtdeyeSkuBatchService iTtdeyeSkuBatchService;
 
 
     /**
@@ -95,11 +99,8 @@ public class TtdeyeBatchController extends BaseController {
      * @return
      */
     @GetMapping(value = "batchStockDetail")
-    public ApiResponseT<List<TtdeyeSkuBatch>> skuStockDetail(Long batchId){
-        List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(Wrappers.<TtdeyeSkuBatch>lambdaQuery()
-                .eq(TtdeyeSkuBatch::getBatchId,batchId)
-        );
-        return ApiResponseT.ok(ttdeyeSkuBatchList);
+    public ApiResponseT<List<TtdeyeSkuBatchDto>> skuStockDetail(Long batchId){
+        return ApiResponseT.ok(iTtdeyeSkuBatchService.selectTtdeyeSkuBatchDtoByBatchId(batchId));
     }
 
 
