@@ -121,7 +121,7 @@ public class TtdeyeUserController extends BaseController {
     public ApiResponseT editUser(@RequestBody TtdeyeUser ttdeyeUser){
         TtdeyeUser ttdeyeUserAdmin = getTtdeyeUser();
 
-        if(ttdeyeUserAdmin == null && ttdeyeUserAdmin.getAdminFlag() != 1){
+        if(ttdeyeUserAdmin == null || ttdeyeUserAdmin.getAdminFlag() != 1){
             return ApiResponseT.failed("非管理员禁止操作！");
         }
         if(!StringUtils.isEmpty(ttdeyeUser.getLoginAccount())) {
