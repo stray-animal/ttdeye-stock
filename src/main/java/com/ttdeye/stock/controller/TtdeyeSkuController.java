@@ -11,7 +11,9 @@ import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
 import com.ttdeye.stock.domain.dto.req.SkuRackUpAndDownReq;
 import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
 import com.ttdeye.stock.entity.TtdeyeSku;
+import com.ttdeye.stock.entity.TtdeyeSkuBatch;
 import com.ttdeye.stock.entity.TtdeyeUser;
+import com.ttdeye.stock.mapper.TtdeyeSkuBatchMapper;
 import com.ttdeye.stock.service.ITtdeyeSkuService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -49,6 +51,9 @@ public class TtdeyeSkuController extends BaseController {
 
     @Autowired
     private HttpServletResponse response;
+
+    @Autowired
+    private TtdeyeSkuBatchMapper ttdeyeSkuBatchMapper;
 
 
 
@@ -247,6 +252,18 @@ public class TtdeyeSkuController extends BaseController {
     }
 
 
+    /**
+     * 查询SKU库存明细
+     * @param skuId
+     * @return
+     */
+    @GetMapping(value = "skuStockDetail")
+    public ApiResponseT<List<TtdeyeSkuBatch>> skuStockDetail(Long skuId){
+        List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(Wrappers.<TtdeyeSkuBatch>lambdaQuery()
+                .eq(TtdeyeSkuBatch::getSkuId,skuId)
+            );
+        return ApiResponseT.ok(ttdeyeSkuBatchList);
+    }
 
 
 }

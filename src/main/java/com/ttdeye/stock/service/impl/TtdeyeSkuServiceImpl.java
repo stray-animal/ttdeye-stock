@@ -99,94 +99,94 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
         }
 
         for (int i = 0; i < skuImportDtoList.size(); i++) {
-            Integer line = i+1;
+            Integer line = i + 1;
             SkuImportDto skuImportDto = skuImportDtoList.get(i);
 
-            if(StringUtils.isEmpty(skuImportDto.getSpuCode()) && StringUtils.isEmpty(skuImportDto.getSpuNo())){
-                return ApiResponseT.failed("第"+line+"行,SPU代码或SPU编号至少一项必填！");
+            if (StringUtils.isEmpty(skuImportDto.getSpuCode()) && StringUtils.isEmpty(skuImportDto.getSpuNo())) {
+                return ApiResponseT.failed("第" + line + "行,SPU代码或SPU编号至少一项必填！");
             }
             //SKU代码是否重复
             Long count = ttdeyeSkuMapper.selectCount(Wrappers.<TtdeyeSku>lambdaQuery()
-                    .eq(TtdeyeSku::getDeleteFlag,0)
-                    .eq(TtdeyeSku::getSkuCode,skuImportDto.getSkuCode()));
-            if(count > 0){
-                return ApiResponseT.failed("第"+line+"行,SKU代码"+skuImportDto.getSkuCode()+"已存在,请修改后重新上传！");
+                    .eq(TtdeyeSku::getDeleteFlag, 0)
+                    .eq(TtdeyeSku::getSkuCode, skuImportDto.getSkuCode()));
+            if (count > 0) {
+                return ApiResponseT.failed("第" + line + "行,SKU代码" + skuImportDto.getSkuCode() + "已存在,请修改后重新上传！");
             }
             //校验批次商品未填写批次号提示
             //查询SPU信息
             TtdeyeSpu ttdeyeSpu = ttdeyeSpuMapper.selectOne(Wrappers.<TtdeyeSpu>lambdaQuery()
-                    .eq(TtdeyeSpu::getDeleteFlag,0)
-                    .eq(skuImportDto.getSpuCode() != null,TtdeyeSpu::getSpuCode,skuImportDto.getSpuCode())
-                    .eq(skuImportDto.getSpuNo() != null,TtdeyeSpu::getSpuNo,skuImportDto.getSpuNo()));
-            if(ttdeyeSpu == null){
-                return ApiResponseT.failed("第"+line+"行,未查询到有效SPU,请查证！");
+                    .eq(TtdeyeSpu::getDeleteFlag, 0)
+                    .eq(skuImportDto.getSpuCode() != null, TtdeyeSpu::getSpuCode, skuImportDto.getSpuCode())
+                    .eq(skuImportDto.getSpuNo() != null, TtdeyeSpu::getSpuNo, skuImportDto.getSpuNo()));
+            if (ttdeyeSpu == null) {
+                return ApiResponseT.failed("第" + line + "行,未查询到有效SPU,请查证！");
             }
-            if(ttdeyeSpu.getBatchFlag() == 1){
-                if(StringUtils.isEmpty(skuImportDto.getBatchNo())){
-                    return ApiResponseT.failed("第"+line+"行,批次商品，必须填写批次号！");
-                }else{
+            if (ttdeyeSpu.getBatchFlag() == 1 && skuImportDto.getStockNum() > 0) {
+                if (StringUtils.isEmpty(skuImportDto.getBatchNo())) {
+                    return ApiResponseT.failed("第" + line + "行,批次商品，必须填写批次号！");
+                } else {
                     TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
                             Wrappers.<TtdeyeBatch>lambdaQuery()
-                                    .eq(TtdeyeBatch::getDeleteFlag,0)
-                                    .eq(TtdeyeBatch::getBatchNo,skuImportDto.getBatchNo())
+                                    .eq(TtdeyeBatch::getDeleteFlag, 0)
+                                    .eq(TtdeyeBatch::getBatchNo, skuImportDto.getBatchNo())
                     );
-                    if(ttdeyeBatch == null){
-                        return ApiResponseT.failed("第"+line+"行,批次商品，初始批次号不可用，请修改！");
+                    if (ttdeyeBatch == null) {
+                        return ApiResponseT.failed("第" + line + "行,批次商品，初始批次号不可用，请修改！");
                     }
                 }
 
             }
 
 
-
             //SPU校验完成，保存上传文件记录
-            String fileUrl = iTtdeyeFileLogService.saveFile(multipartFile,2,ttdeyeUser.getLoginAccount());
-
+            String fileUrl = iTtdeyeFileLogService.saveFile(multipartFile, 2, ttdeyeUser.getLoginAccount());
             //创建SKU信息
             TtdeyeSku ttdeyeSku = this.saveTtdeyeSku(ttdeyeUser, skuImportDto, ttdeyeSpu);
 
-            //保存库存变更记录
-            TtdeyeStockChangeRecord ttdeyeStockChangeRecord = new TtdeyeStockChangeRecord();
-            ttdeyeStockChangeRecord.setSkuId(ttdeyeSku.getSkuId());
-            ttdeyeStockChangeRecord.setSkuNo(ttdeyeSku.getSkuNo());
-            ttdeyeStockChangeRecord.setSkuBeforeStock(0L);
-            ttdeyeStockChangeRecord.setSkuAfterStock(ttdeyeSku.getStockCurrentNum());
-            ttdeyeStockChangeRecord.setOccurStock(ttdeyeSku.getStockCurrentNum());
-            ttdeyeStockChangeRecord.setDirection(1);
-            ttdeyeStockChangeRecord.setSourceType(1);
-            ttdeyeStockChangeRecord.setFileUrl(fileUrl);
-            ttdeyeStockChangeRecord.setCreateTime(new Date());
-            ttdeyeStockChangeRecord.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
-            ttdeyeStockChangeRecord.setCreateNikeName(ttdeyeUser.getNickName());
-            ttdeyeStockChangeRecord.setDeleteFlag(0);
-            ttdeyeStockChangeRecord.setSpuId(ttdeyeSku.getSpuId());
-            ttdeyeStockChangeRecord.setSpuNo(ttdeyeSku.getSpuNo());
-            ttdeyeStockChangeRecord.setUnitPrice(ttdeyeSku.getPurchasePrice());
+            //如果库存数大于0，则进行初始入库
+            if (skuImportDto.getStockNum() > 0) {
+                //保存库存变更记录
+                TtdeyeStockChangeRecord ttdeyeStockChangeRecord = new TtdeyeStockChangeRecord();
+                ttdeyeStockChangeRecord.setSkuId(ttdeyeSku.getSkuId());
+                ttdeyeStockChangeRecord.setSkuNo(ttdeyeSku.getSkuNo());
+                ttdeyeStockChangeRecord.setSkuBeforeStock(0L);
+                ttdeyeStockChangeRecord.setSkuAfterStock(ttdeyeSku.getStockCurrentNum());
+                ttdeyeStockChangeRecord.setOccurStock(ttdeyeSku.getStockCurrentNum());
+                ttdeyeStockChangeRecord.setDirection(1);
+                ttdeyeStockChangeRecord.setSourceType(1);
+                ttdeyeStockChangeRecord.setFileUrl(fileUrl);
+                ttdeyeStockChangeRecord.setCreateTime(new Date());
+                ttdeyeStockChangeRecord.setCreateLoginAccount(ttdeyeUser.getLoginAccount());
+                ttdeyeStockChangeRecord.setCreateNikeName(ttdeyeUser.getNickName());
+                ttdeyeStockChangeRecord.setDeleteFlag(0);
+                ttdeyeStockChangeRecord.setSpuId(ttdeyeSku.getSpuId());
+                ttdeyeStockChangeRecord.setSpuNo(ttdeyeSku.getSpuNo());
+                ttdeyeStockChangeRecord.setUnitPrice(ttdeyeSku.getPurchasePrice());
 
-            //如果是批次商品
-            if(ttdeyeSpu.getBatchFlag() == 1){
-                TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
-                        Wrappers.<TtdeyeBatch>lambdaQuery()
-                                .eq(TtdeyeBatch::getDeleteFlag,0)
-                                .eq(TtdeyeBatch::getBatchNo,skuImportDto.getBatchNo())
-                        );
+                //如果是批次商品
+                if (ttdeyeSpu.getBatchFlag() == 1) {
+                    TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                            Wrappers.<TtdeyeBatch>lambdaQuery()
+                                    .eq(TtdeyeBatch::getDeleteFlag, 0)
+                                    .eq(TtdeyeBatch::getBatchNo, skuImportDto.getBatchNo())
+                    );
 
-                //保存批次库存信息
-                TtdeyeSkuBatch ttdeyeSkuBatch = this.savetdeyeSkuBatch(skuImportDto, ttdeyeSku, ttdeyeBatch);
+                    //保存批次库存信息
+                    TtdeyeSkuBatch ttdeyeSkuBatch = this.savetdeyeSkuBatch(skuImportDto, ttdeyeSku, ttdeyeBatch);
 
-                //变更记录相应处理
-                ttdeyeStockChangeRecord.setBatchFlag(1);
-                ttdeyeStockChangeRecord.setBatchId(ttdeyeBatch.getBatchId());
-                ttdeyeStockChangeRecord.setBatchNo(ttdeyeBatch.getBatchNo());
-                ttdeyeStockChangeRecord.setSkuBatchNo(ttdeyeSkuBatch.getSkuBatchNo());
-                ttdeyeStockChangeRecord.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
-                ttdeyeStockChangeRecord.setSkuBatchBeforeStock(0L);
-                ttdeyeStockChangeRecord.setSkuBatchAfterStock(ttdeyeSkuBatch.getStockCurrentNum());
+                    //变更记录相应处理
+                    ttdeyeStockChangeRecord.setBatchFlag(1);
+                    ttdeyeStockChangeRecord.setBatchId(ttdeyeBatch.getBatchId());
+                    ttdeyeStockChangeRecord.setBatchNo(ttdeyeBatch.getBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchNo(ttdeyeSkuBatch.getSkuBatchNo());
+                    ttdeyeStockChangeRecord.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
+                    ttdeyeStockChangeRecord.setSkuBatchBeforeStock(0L);
+                    ttdeyeStockChangeRecord.setSkuBatchAfterStock(ttdeyeSkuBatch.getStockCurrentNum());
+                }
+                //保存库存变更记录
+                ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
             }
-            //保存库存变更记录
-            ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
         }
-
         return ApiResponseT.ok();
     }
 

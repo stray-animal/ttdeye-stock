@@ -1,15 +1,19 @@
 package com.ttdeye.stock.controller;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.common.base.controller.BaseController;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.entity.TtdeyeBatch;
+import com.ttdeye.stock.entity.TtdeyeSkuBatch;
 import com.ttdeye.stock.entity.TtdeyeUser;
+import com.ttdeye.stock.mapper.TtdeyeSkuBatchMapper;
 import com.ttdeye.stock.service.ITtdeyeBatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 批次信息
@@ -23,6 +27,11 @@ public class TtdeyeBatchController extends BaseController {
 
     @Autowired
     private ITtdeyeBatchService iTtdeyeBatchService;
+
+
+    @Autowired
+    private TtdeyeSkuBatchMapper ttdeyeSkuBatchMapper;
+
 
     /**
      * 新增批次
@@ -79,6 +88,19 @@ public class TtdeyeBatchController extends BaseController {
     }
 
 
+
+    /**
+     * 查询批次库存明细
+     * @param batchId
+     * @return
+     */
+    @GetMapping(value = "batchStockDetail")
+    public ApiResponseT<List<TtdeyeSkuBatch>> skuStockDetail(Long batchId){
+        List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(Wrappers.<TtdeyeSkuBatch>lambdaQuery()
+                .eq(TtdeyeSkuBatch::getBatchId,batchId)
+        );
+        return ApiResponseT.ok(ttdeyeSkuBatchList);
+    }
 
 
 
