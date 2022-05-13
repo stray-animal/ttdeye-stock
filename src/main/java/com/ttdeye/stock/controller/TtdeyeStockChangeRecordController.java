@@ -15,9 +15,8 @@ import com.ttdeye.stock.common.base.controller.BaseController;
 import java.util.List;
 
 /**
- * <p>
- * 库存变更记录 前端控制器
- * </p>
+ *
+ * 库存变更记录
  *
  * @author 张永明
  * @since 2022-04-25
