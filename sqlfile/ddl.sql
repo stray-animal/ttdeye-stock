@@ -154,7 +154,7 @@ create table `ttdeye-stock`.ttdeye_stock_change_record
     sku_batch_after_stock  bigint         default 0                 not null comment 'sku批次现库存',
     occur_stock            bigint         default 0                 not null comment '出入库数量：发生量',
     direction              int            default 0                 not null comment '方向：1-入库，0-出库',
-    batch_flag             int            default 0                 not null comment '是否批次出库：1-是，0-否',
+    batch_flag             int            default 0                 not null comment '是否批次出入库：1-是，0-否',
     source_type            int            default 0                 not null comment '来源：1-批量导入SKU，2-采购入库导入，3-批量出库，4，手动入库，5，手动出库',
     order_no               varchar(64)    default ''                not null comment '订单编号',
     order_desc             varchar(256)   default ''                not null comment '订单商品明细：json',

@@ -34,13 +34,12 @@ public class LoginInterceptor implements HandlerInterceptor {
      * @param response
      * @param handler
      * @return
-     * @throws Exception
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         //从header获取X-Auth-Token的值
         String xAuthToken = checkAndGetXAuthTokenValue(request);
-        try {
+//        try {
             //根据token获取参数
             // 从redis取出json序列化的对象，然后转换成TtdeyeUserDto对象
             Object userObject = redisTemplateUtils.get(xAuthToken);
@@ -52,10 +51,10 @@ public class LoginInterceptor implements HandlerInterceptor {
             }
             //重置缓存的失效时间
             redisTemplateUtils.set(xAuthToken, ttdeyeUserDto, GlobalBusinessConstant.EXPIRE_TIMES.HOURS_ONE);
-        } catch (Exception e) {
-            log.error("权限过滤器发生异常：{}", e.getMessage());
-            throw new ApiException(ApiResponseCode.COMMON_FAILED_CODE.code, e.getMessage());
-        }
+//        } catch (Exception e) {
+//            log.error("权限过滤器发生异常：{}", e.getMessage());
+//            throw new ApiException(ApiResponseCode.COMMON_FAILED_CODE.code, e.getMessage());
+//        }
         return true;
     }
 

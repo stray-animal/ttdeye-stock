@@ -35,6 +35,7 @@ public class JwtUtils {
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
         //构造jwt
         TtdeyeUser ttdeyeUser = (TtdeyeUser) obj;
+        ttdeyeUser.setLoginPassword(null);
         JwtBuilder builder = Jwts.builder().setHeaderParam("type", "jwt")
                 .claim("ttdeyeUser", ttdeyeUser)
                 .signWith(signatureAlgorithm, signingKey);

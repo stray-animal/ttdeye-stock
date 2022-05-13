@@ -44,7 +44,7 @@ public class SkuImportDto implements Serializable {
     /**
      * sku名称
      */
-    @Excel(name = "sku名称")
+    @Excel(name = "SKU名称")
     private String skuName;
 
 
