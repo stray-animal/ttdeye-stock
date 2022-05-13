@@ -8,6 +8,7 @@ import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.req.SkuExportReq;
 import com.ttdeye.stock.domain.dto.req.SkuOutOfStockReq;
+import com.ttdeye.stock.domain.dto.req.SkuRackUpAndDownReq;
 import com.ttdeye.stock.domain.dto.req.SkuWarehousingReq;
 import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeUser;
@@ -180,7 +181,7 @@ public class TtdeyeSkuController extends BaseController {
      * 手动出库
      * @return
      */
-    @PostMapping(value = "skuOperaWarehousing")
+    @PostMapping(value = "skuOperaOutOfStock")
     public ApiResponseT skuOperaOutOfStock(@RequestBody SkuOutOfStockReq skuOutOfStockReq){
         TtdeyeUser ttdeyeUser = getTtdeyeUser();
         iTtdeyeSkuService.skuOperaOutOfStock(skuOutOfStockReq,ttdeyeUser);
@@ -231,7 +232,19 @@ public class TtdeyeSkuController extends BaseController {
     }
 
 
-
+    /**
+     * 操作SKU上下架
+     * @param skuRackUpAndDownReq
+     * @return
+     */
+    @PostMapping(value = "skuRackUpAndDown")
+    public ApiResponseT skuRackUpAndDown(@RequestBody SkuRackUpAndDownReq skuRackUpAndDownReq){
+        TtdeyeSku ttdeyeSku = new TtdeyeSku();
+        ttdeyeSku.setSkuId(skuRackUpAndDownReq.getSkuId());
+        ttdeyeSku.setState(skuRackUpAndDownReq.getState());
+        iTtdeyeSkuService.updateById(ttdeyeSku);
+        return ApiResponseT.ok();
+    }
 
 
 
