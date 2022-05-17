@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ttdeye.stock.domain.dto.GoodsInfoDto;
 import com.ttdeye.stock.domain.dto.TtdeyeStockChangeRecordDto;
 import com.ttdeye.stock.domain.dto.req.TtdeyeStockChangeRecordReq;
+import com.ttdeye.stock.entity.TtdeyeBatch;
 import com.ttdeye.stock.entity.TtdeyeSku;
 import com.ttdeye.stock.entity.TtdeyeStockChangeRecord;
+import com.ttdeye.stock.mapper.TtdeyeBatchMapper;
 import com.ttdeye.stock.mapper.TtdeyeSkuMapper;
 import com.ttdeye.stock.mapper.TtdeyeStockChangeRecordMapper;
 import com.ttdeye.stock.service.ITtdeyeStockChangeRecordService;
@@ -39,6 +41,9 @@ public class TtdeyeStockChangeRecordServiceImpl extends ServiceImpl<TtdeyeStockC
 
     @Autowired
     private TtdeyeStockChangeRecordMapper ttdeyeStockChangeRecordMapper;
+
+    @Autowired
+    private TtdeyeBatchMapper ttdeyeBatchMapper;
 
     /**
      * 查询库存变动日志
@@ -86,6 +91,12 @@ public class TtdeyeStockChangeRecordServiceImpl extends ServiceImpl<TtdeyeStockC
             ttdeyeStockChangeRecordDto.setSkuCode(ttdeyeSku.getSkuCode());
             ttdeyeStockChangeRecordDto.setSkuName(ttdeyeSku.getSkuName());
 
+            if(ttdeyeStockChangeRecord.getBatchId() != null) {
+                TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                        Wrappers.<TtdeyeBatch>lambdaQuery().eq(TtdeyeBatch::getBatchId, ttdeyeStockChangeRecord.getBatchId())
+                );
+                ttdeyeStockChangeRecordDto.setProductionDate(ttdeyeBatch.getProductionDate());
+            }
             ttdeyeStockChangeRecordDtoList.add(ttdeyeStockChangeRecordDto);
         }
         ttdeyeStockChangeRecordDtoPage.setRecords(ttdeyeStockChangeRecordDtoList);
