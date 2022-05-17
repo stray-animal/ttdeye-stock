@@ -65,7 +65,7 @@ public class TtdeyeSkuController extends BaseController {
      * @return
      */
     @PostMapping(value = "add")
-    public ApiResponseT saveUser(@RequestBody TtdeyeSku iTtdeyeSku){
+    public ApiResponseT<Long> saveSku(@RequestBody TtdeyeSku iTtdeyeSku){
 
         Long count =  iTtdeyeSkuService.count(Wrappers.<TtdeyeSku>lambdaQuery()
                 .eq(TtdeyeSku::getDeleteFlag,0)
@@ -82,7 +82,7 @@ public class TtdeyeSkuController extends BaseController {
         iTtdeyeSku.setSourceType(1);
         iTtdeyeSku.setState(1);
         iTtdeyeSkuService.save(iTtdeyeSku);
-        return ApiResponseT.ok();
+        return ApiResponseT.ok(iTtdeyeSku.getSkuId());
     }
 
 
@@ -92,7 +92,7 @@ public class TtdeyeSkuController extends BaseController {
      * @return
      */
     @PostMapping(value = "edit")
-    public ApiResponseT editUser(@RequestBody TtdeyeSku iTtdeyeSku){
+    public ApiResponseT editSku(@RequestBody TtdeyeSku iTtdeyeSku){
 
         Long count =  iTtdeyeSkuService.count(Wrappers.<TtdeyeSku>lambdaQuery()
                 .eq(TtdeyeSku::getDeleteFlag,0)
