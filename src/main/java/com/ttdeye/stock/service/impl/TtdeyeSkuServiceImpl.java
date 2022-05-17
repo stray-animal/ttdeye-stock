@@ -6,7 +6,9 @@ import cn.afterturn.easypoi.excel.ExcelImportUtil;
 import cn.afterturn.easypoi.excel.entity.ImportParams;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ttdeye.stock.common.domain.ApiResponseCode;
 import com.ttdeye.stock.common.domain.ApiResponseT;
+import com.ttdeye.stock.common.exception.ApiException;
 import com.ttdeye.stock.common.utils.BigDecimalUtils;
 import com.ttdeye.stock.common.utils.JacksonUtil;
 import com.ttdeye.stock.common.utils.OSSClientUtils;
@@ -258,14 +260,30 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
      * @param ttdeyeUser
      */
     public void skuOperaWarehousing(SkuWarehousingReq skuWarehousingReq, TtdeyeUser ttdeyeUser){
-        //SKU代码是否重复
-        TtdeyeSku ttdeyeSku = ttdeyeSkuMapper.selectById(skuWarehousingReq.getSkuId());
 
+        TtdeyeSku ttdeyeSku = ttdeyeSkuMapper.selectById(skuWarehousingReq.getSkuId());
         //查询SPU信息
         TtdeyeSpu ttdeyeSpu = ttdeyeSpuMapper.selectOne(Wrappers.<TtdeyeSpu>lambdaQuery()
                 .eq(TtdeyeSpu::getDeleteFlag,0)
                 .eq(TtdeyeSpu::getSpuId,ttdeyeSku.getSpuId())
         );
+
+        if(ttdeyeSpu.getBatchFlag() == 1){
+            if(StringUtils.isEmpty(skuWarehousingReq.getBatchNo())){
+                throw new ApiException(ApiResponseCode.COMMON_FAILED_CODE,"批次商品，必须填写批次号！");
+            }else{
+                TtdeyeBatch ttdeyeBatch = ttdeyeBatchMapper.selectOne(
+                        Wrappers.<TtdeyeBatch>lambdaQuery()
+                                .eq(TtdeyeBatch::getDeleteFlag,0)
+                                .eq(TtdeyeBatch::getBatchNo,skuWarehousingReq.getBatchNo())
+                );
+                if(ttdeyeBatch == null){
+                    throw new ApiException(ApiResponseCode.COMMON_FAILED_CODE,"当前批次号不可用，请修改！");
+                }
+            }
+
+        }
+
         this.skuWareHousing(ttdeyeUser,skuWarehousingReq,ttdeyeSku,ttdeyeSpu,null);
     }
 
@@ -348,7 +366,7 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
         //首先入库到SKU
         TtdeyeSku ttdeyeSkuNew = new TtdeyeSku();
         ttdeyeSkuNew.setStockCurrentNum(ttdeyeSku.getStockCurrentNum() + skuWarehousingDto.getStockNum());
-        ttdeyeSkuNew.setStockAllNum(ttdeyeSkuNew.getStockAllNum() + skuWarehousingDto.getStockNum());
+        ttdeyeSkuNew.setStockAllNum(ttdeyeSku.getStockAllNum() + skuWarehousingDto.getStockNum());
         ttdeyeSkuNew.setUpdateTime(new Date());
         ttdeyeSkuNew.setUpdateLoginAccount(ttdeyeUser.getLoginAccount());
         ttdeyeSkuNew.setSkuId(ttdeyeSku.getSkuId());

@@ -81,6 +81,22 @@ public class TtdeyeBatchController extends BaseController {
 
 
     /**
+     * 模糊检索批次号
+      * @param batchNo
+     * @return
+     */
+    @GetMapping(value = "numbers")
+    public ApiResponseT<List<TtdeyeBatch>> getNumbers(String batchNo){
+        List<TtdeyeBatch> result = iTtdeyeBatchService.list(Wrappers.<TtdeyeBatch>lambdaQuery()
+                .like(TtdeyeBatch::getBatchNo,batchNo)
+                .orderByDesc(TtdeyeBatch::getBatchNo));
+        return ApiResponseT.ok(result);
+    }
+
+
+
+
+    /**
      * 根据id查询批次信息
      * @param batchId
      * @return
