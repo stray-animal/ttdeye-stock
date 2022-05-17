@@ -16,7 +16,7 @@ grant alter, alter routine, create, create routine, create temporary tables, cre
 
 create table `ttdeye-stock`.ttdeye_batch
 (
-    batch_id        bigint auto_increment comment '批次id'
+    batch_id        bigint  comment '批次id'
         primary key,
     batch_no        varchar(64)                         not null comment '批次编号',
     production_date date                                null comment '生产日期',
@@ -24,22 +24,25 @@ create table `ttdeye-stock`.ttdeye_batch
     create_time     timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
     delete_flag     int       default 0                 not null comment '是否删除：1-已删除，0-未删除'
 )
-    comment '批次信息';
+    comment '批次信息'  ;
+
+create index ttdeye_batch_batch_no_index
+    on `ttdeye-stock`.ttdeye_batch (batch_no);
 
 create table `ttdeye-stock`.ttdeye_file_log
 (
-    log_id               bigint auto_increment comment '主键id'
+    log_id               bigint  comment '主键id'
         primary key,
     file_url             varchar(256) default ''                not null comment '导入文件地址',
     file_type            int          default 0                 not null comment '文件类别：1-商品（spu）导入，2-产品（sku）导入，3-批量入库，4-批量出库',
     create_time          timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
     create_login_account varchar(64)  default ''                not null comment '操作人账号'
 )
-    comment '文件记录' ;
+    comment '文件记录'  ;
 
 create table `ttdeye-stock`.ttdeye_notify_record
 (
-    record_id   bigint auto_increment comment '通知记录id'
+    record_id   bigint  comment '通知记录id'
         primary key,
     shop_name   varchar(64)                         not null comment '店铺名称',
     shop_id     bigint    default 0                 not null comment '店铺id',
@@ -53,7 +56,7 @@ create table `ttdeye-stock`.ttdeye_notify_record
 
 create table `ttdeye-stock`.ttdeye_shop
 (
-    shop_id           bigint auto_increment comment '商店id'
+    shop_id           bigint  comment '商店id'
         primary key,
     shop_name         varchar(32)  default ''                not null comment '店铺名称',
     shop_callback_url varchar(256) default ''                not null comment '回调地址',
@@ -65,7 +68,7 @@ create table `ttdeye-stock`.ttdeye_shop
 
 create table `ttdeye-stock`.ttdeye_sku
 (
-    sku_id               bigint auto_increment comment 'skuId，主键id'
+    sku_id               bigint  comment 'skuId，主键id'
         primary key,
     sku_code             varchar(64)    default ''                not null comment 'SKU代码',
     sku_name             varchar(64)    default ''                not null comment 'sku名称',
@@ -85,11 +88,17 @@ create table `ttdeye-stock`.ttdeye_sku
     delete_flag          int            default 0                 not null comment '是否删除：1-删除，0-未删除',
     sku_no               varchar(64)    default ''                not null comment 'SKU编号'
 )
-    comment '产品信息表SKU';
+    comment '产品信息表SKU'  ;
+
+create index ttdeye_sku_sku_no_index
+    on `ttdeye-stock`.ttdeye_sku (sku_no);
+
+create index ttdeye_sku_spu_no_index
+    on `ttdeye-stock`.ttdeye_sku (spu_no);
 
 create table `ttdeye-stock`.ttdeye_sku_batch
 (
-    sku_batch_id      bigint auto_increment comment 'sku库存批次表主键'
+    sku_batch_id      bigint  comment 'sku库存批次表主键'
         primary key,
     sku_id            bigint                                null comment 'skuid',
     sku_no            varchar(64) default ''                not null comment 'sku编号',
@@ -102,11 +111,23 @@ create table `ttdeye-stock`.ttdeye_sku_batch
     update_time       timestamp                             null comment '更新时间',
     sku_batch_no      varchar(64) default ''                not null comment 'sku批次库存编号'
 )
-    comment 'sku库存批次表';
+    comment 'sku库存批次表'  ;
+
+create index ttdeye_sku_batch_batch_id_index
+    on `ttdeye-stock`.ttdeye_sku_batch (batch_id);
+
+create index ttdeye_sku_batch_batch_no_index
+    on `ttdeye-stock`.ttdeye_sku_batch (batch_no);
+
+create index ttdeye_sku_batch_sku_id_index
+    on `ttdeye-stock`.ttdeye_sku_batch (sku_id);
+
+create index ttdeye_sku_batch_sku_no_index
+    on `ttdeye-stock`.ttdeye_sku_batch (sku_no);
 
 create table `ttdeye-stock`.ttdeye_sku_shop_detail
 (
-    detail_id            bigint auto_increment comment '明细id'
+    detail_id            bigint  comment '明细id'
         primary key,
     shop_id              bigint                                not null comment '商店id',
     sku_id               bigint      default 0                 not null comment 'skuid',
@@ -121,7 +142,7 @@ create table `ttdeye-stock`.ttdeye_sku_shop_detail
 
 create table `ttdeye-stock`.ttdeye_spu
 (
-    spu_id               bigint auto_increment comment 'spuId'
+    spu_id               bigint  comment 'spuId'
         primary key,
     spu_code             varchar(64)  default ''                not null comment '商品编码',
     title_ch             varchar(64)  default ''                not null comment '中文名称',
@@ -138,11 +159,11 @@ create table `ttdeye-stock`.ttdeye_spu
     batch_flag           int          default 0                 not null comment '是否支持批次：1-支持，0-不支持',
     spu_no               varchar(64)                            not null comment 'SPU编号'
 )
-    comment '商品信息表' ;
+    comment '商品信息表'  ;
 
 create table `ttdeye-stock`.ttdeye_stock_change_record
 (
-    record_id              bigint auto_increment comment '库存变更记录id'
+    record_id              bigint  comment '库存变更记录id'
         primary key,
     sku_id                 bigint         default 0                 not null comment 'skuId',
     sku_no                 varchar(64)    default ''                not null comment 'sku编码',
@@ -170,11 +191,26 @@ create table `ttdeye-stock`.ttdeye_stock_change_record
     sku_batch_id           bigint         default 0                 not null comment 'sku库存主键',
     unit_price             decimal(12, 2) default 0.00              not null comment '入库单价-分'
 )
-    comment '库存变更记录';
+    comment '库存变更记录'  ;
+
+create index ttdeye_stock_change_record_batch_no_index
+    on `ttdeye-stock`.ttdeye_stock_change_record (batch_no);
+
+create index ttdeye_stock_change_record_sku_id_index
+    on `ttdeye-stock`.ttdeye_stock_change_record (sku_id);
+
+create index ttdeye_stock_change_record_sku_no_index
+    on `ttdeye-stock`.ttdeye_stock_change_record (sku_no);
+
+create index ttdeye_stock_change_record_spu_id_index
+    on `ttdeye-stock`.ttdeye_stock_change_record (spu_id);
+
+create index ttdeye_stock_change_record_spu_no_index
+    on `ttdeye-stock`.ttdeye_stock_change_record (spu_no);
 
 create table `ttdeye-stock`.ttdeye_user
 (
-    user_id             bigint auto_increment comment '用户主键id'
+    user_id             bigint  comment '用户主键id'
         primary key,
     user_code           varchar(64) default ''                not null comment '用户编码',
     nick_name           varchar(64)                           null comment '昵称',
@@ -192,5 +228,5 @@ create table `ttdeye-stock`.ttdeye_user
     constraint ttdeye_user_user_code_uindex
         unique (user_code)
 )
-    comment '用户表';
+    comment '用户表'  ;
 
