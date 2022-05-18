@@ -77,7 +77,7 @@ create table `ttdeye-stock`.ttdeye_sku
     stock_out_num        bigint         default 0                 not null comment '总计出库数量',
     purchase_price       decimal(12, 2) default 0.00              not null comment '采购单价-分',
     remark               varchar(64)    default ''                not null comment '备注',
-    degree               decimal(3, 2)  default 0.00              not null comment '度数',
+    degree               decimal(4, 2)  default 0.00              not null comment '度数',
     create_time          timestamp      default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time          timestamp                                null comment '更新时间',
     update_login_account varchar(64)    default ''                not null comment '更新人账号',
