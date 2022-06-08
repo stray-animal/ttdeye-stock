@@ -9,10 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ttdeye.stock.common.domain.ApiResponseCode;
 import com.ttdeye.stock.common.domain.ApiResponseT;
 import com.ttdeye.stock.common.exception.ApiException;
-import com.ttdeye.stock.common.utils.BigDecimalUtils;
-import com.ttdeye.stock.common.utils.JacksonUtil;
-import com.ttdeye.stock.common.utils.OSSClientUtils;
-import com.ttdeye.stock.common.utils.SnowflakeIdWorker;
+import com.ttdeye.stock.common.utils.*;
 import com.ttdeye.stock.domain.dto.poi.SkuExportDto;
 import com.ttdeye.stock.domain.dto.poi.SkuImportDto;
 import com.ttdeye.stock.domain.dto.poi.SkuOutOfStockDto;
@@ -35,8 +32,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -539,16 +540,58 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
             //进行批次出库
             //todo 查询sku批次库存列表,以批次号正序排序
 
-            List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchMapper.selectList(
+            List<TtdeyeSkuBatch> ttdeyeSkuBatchListYe = ttdeyeSkuBatchMapper.selectList(
                 Wrappers.<TtdeyeSkuBatch>lambdaQuery()
                         .eq(TtdeyeSkuBatch::getSkuId, ttdeyeSku.getSkuId())
                         .le(TtdeyeSkuBatch::getStockCurrentNum,0)
                         .orderByDesc(TtdeyeSkuBatch::getBatchNo)
             );
 
-             //出库剩余数量
+            if(CollectionUtils.isEmpty(ttdeyeSkuBatchListYe)){
+                throw new ApiException(ApiResponseCode.COMMON_FAILED_CODE,"未查询到批次库存，出库失败！");
+            }
+            //批量查询批次信息
+
+
+            List<Long> batchIdList = ttdeyeSkuBatchListYe.stream().map(TtdeyeSkuBatch::getBatchId).collect(Collectors.toList());
+
+            List<TtdeyeBatch> batchListYe = ttdeyeBatchMapper.selectList(
+                    Wrappers.<TtdeyeBatch>lambdaQuery()
+                            .in(TtdeyeBatch :: getBatchId,batchIdList)
+            );
+
+            List<TtdeyeBatch> batchList = batchListYe.stream().sorted(
+
+                    (e1,e2) -> DateLaterUtils.dateSorted(DateLaterUtils.getLastDate(e1.getProductionDate(),e1.getShelfLife()), DateLaterUtils.getLastDate(e2.getProductionDate(),e2.getShelfLife()))
+
+            ).collect(Collectors.toList());
+
+
+            List<Long> batchIdListNew  = batchList.stream().map(TtdeyeBatch::getBatchId).collect(Collectors.toList());
+
+
+            List<TtdeyeSkuBatch> ttdeyeSkuBatchList = ttdeyeSkuBatchListYe.stream().sorted(
+
+                    (e1, e2) -> {
+
+                        if (batchIdListNew.indexOf(e1.getBatchId()) < batchIdListNew.indexOf(e2.getBatchId())) {
+                            return -1;
+                        } else if (batchIdListNew.indexOf(e1.getBatchId()) > batchIdListNew.indexOf(e2.getBatchId())) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+
+                    }
+
+
+            ).collect(Collectors.toList());
+
+
+
+            //出库剩余数量
              Long outSumBalance = skuOutOfStockDto.getStockNum();
-            //批次出库
+
             for (TtdeyeSkuBatch ttdeyeSkuBatch : ttdeyeSkuBatchList) {
 
                 TtdeyeSkuBatch ttdeyeSkuBatchNew = new TtdeyeSkuBatch();
@@ -586,9 +629,18 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
                     ttdeyeStockChangeRecordMapper.insert(ttdeyeStockChangeRecord);
                     break;
                 }else{
+                    if(ttdeyeSkuBatchList.size() - 1 == ttdeyeSkuBatchList.indexOf(ttdeyeSkuBatch)){
+                      //如果是最后一个则出负数
+                        ttdeyeSkuBatchNew.setStockCurrentNum(ttdeyeSkuBatch.getStockCurrentNum() - outSumBalance);
+                        ttdeyeSkuBatchNew.setStockOutNum(ttdeyeSkuBatch.getStockOutNum() + outSumBalance);
+
+                    }else{
+                        //如果小于出库数量，就把自己出完
+                        ttdeyeSkuBatchNew.setStockCurrentNum(0L);
+                        ttdeyeSkuBatchNew.setStockOutNum(ttdeyeSkuBatch.getStockOutNum() + ttdeyeSkuBatch.getStockCurrentNum());
+                    }
                     //如果小于出库数量，就把自己出完
-                    ttdeyeSkuBatchNew.setStockCurrentNum(0L);
-                    ttdeyeSkuBatchNew.setStockOutNum(ttdeyeSkuBatch.getStockOutNum() + outSumBalance);
+
                     ttdeyeSkuBatchNew.setUpdateTime(new Date());
                     ttdeyeSkuBatchNew.setSkuBatchId(ttdeyeSkuBatch.getSkuBatchId());
                     ttdeyeSkuBatchMapper.updateById(ttdeyeSkuBatchNew);
@@ -625,6 +677,8 @@ public class TtdeyeSkuServiceImpl extends ServiceImpl<TtdeyeSkuMapper, TtdeyeSku
                     }
                 }
             }
+
+
         }
     }
 
