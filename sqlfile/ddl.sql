@@ -230,3 +230,10 @@ create table `ttdeye-stock`.ttdeye_user
 )
     comment '用户表'  ;
 
+
+alter table ttdeye_spu
+    modify spu_attributes_type int default 1 not null comment '商品类型：1-美瞳，2-周边';
+
+alter table ttdeye_sku
+    modify degree varchar(512) default '0.00' not null comment 'SKU属性';
+

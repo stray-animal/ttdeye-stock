@@ -54,7 +54,7 @@ public class TtdeyeSpu implements Serializable {
     private String purchaseUrl;
 
     /**
-     * 1-普通货
+     * 商品类型：1-美瞳，2-周边
      */
     private Integer spuAttributesType;
 

@@ -71,7 +71,7 @@ public class TtdeyeSku implements Serializable {
     /**
      * 度数
      */
-    private BigDecimal degree;
+    private String degree;
 
     /**
      * 创建时间
